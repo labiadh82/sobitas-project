@@ -134,15 +134,15 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
         'group flex flex-col h-full w-full min-w-0 overflow-hidden',
         'rounded-[14px] sm:rounded-xl lg:rounded-2xl',
         'bg-white dark:bg-gray-800',
-        'border border-gray-200/90 dark:border-gray-700/80',
-        'shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)]',
+        'border border-white dark:border-white/20',
+        'shadow-[0_2px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)]',
         'sm:shadow-md lg:shadow-lg',
         'transition-[box-shadow,border-color,transform] duration-300',
         '[@media(hover:hover)]:lg:hover:shadow-2xl [@media(hover:hover)]:lg:hover:border-red-500/40 [@media(hover:hover)]:lg:dark:hover:border-red-500/40 [@media(hover:hover)]:lg:hover:-translate-y-1',
       ].join(' ')}
     >
       {/* Image area: square aspect, subtle bg, contained centered image */}
-      <div className="relative aspect-square w-full flex-shrink-0 overflow-hidden rounded-t-[14px] sm:rounded-t-xl lg:rounded-t-2xl bg-gray-50 dark:bg-gray-100/80 flex items-center justify-center">
+      <div className="relative aspect-square w-full flex-shrink-0 overflow-hidden rounded-t-[14px] sm:rounded-t-xl lg:rounded-t-2xl bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center">
 
         <LinkWithLoading 
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
@@ -183,7 +183,7 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(toFavoriteProduct(product)); }}
-          className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-sm border border-gray-200/80 dark:border-gray-700/80 hover:bg-white dark:hover:bg-gray-800 transition-colors pointer-events-auto"
+          className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/90 dark:bg-gray-700/95 shadow-sm border border-gray-200/80 dark:border-gray-600/80 hover:bg-white dark:hover:bg-gray-700 transition-colors pointer-events-auto"
           aria-label={favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
           <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${favorite ? 'fill-red-600 text-red-600' : 'text-gray-500 dark:text-gray-400'}`} />
@@ -288,7 +288,7 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
         </div>
 
         {/* CTA – Ajouter au panier; visible on mobile/tablet (desktop has overlay) */}
-        <div className="flex-shrink-0 pt-2 md:pt-3 mt-1.5 md:mt-2 border-t border-gray-100 dark:border-gray-700/60 lg:hidden block">
+        <div className="flex-shrink-0 pt-2 md:pt-3 mt-1.5 md:mt-2 border-t border-gray-100 dark:border-gray-600/80 lg:hidden block">
           <Button
             size="sm"
             className={`w-full min-h-[44px] rounded-xl font-semibold text-[10px] xs:text-[11px] sm:text-sm active:scale-[0.98] transition-transform duration-150 select-none px-1.5 sm:px-2 ${productData.isInStock && canAddMore ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white'}`}

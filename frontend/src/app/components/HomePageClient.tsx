@@ -300,7 +300,7 @@ export function HomePageClient({ accueil, slides }: HomePageClientProps) {
               Nous livrons partout en Tunisie via des partenaires fiables, avec un suivi précis de vos colis et des
               délais optimisés pour Sousse, Tunis, Sfax et les autres régions. Les <strong>avis clients</strong> laissés
               sur nos produits vous permettent de vérifier la satisfaction des sportifs qui utilisent déjà nos
-              protéines, <strong>whey</strong> et <strong>crÉatine</strong>. Commandez vos compléments en ligne en toute
+              protéines, <strong>whey</strong> et <strong>créatine</strong>. Commandez vos compléments en ligne en toute
               confiance sur <strong>Protein.tn</strong> et rejoignez la communauté SOBITAS.
             </p>
           </div>

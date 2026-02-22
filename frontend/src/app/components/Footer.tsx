@@ -187,7 +187,11 @@ export function Footer() {
             <ul className="space-y-1.5">
               {footerPages.length > 0 ? footerPages.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/page/${p.slug}`} className="block py-2 text-sm text-gray-400 hover:text-red-500 active:text-red-500">{p.title}</Link>
+                  {p.slug ? (
+                    <Link href={`/page/${p.slug}`} className="block py-2 text-sm text-gray-400 hover:text-red-500 active:text-red-500">{p.title}</Link>
+                  ) : (
+                    <span className="block py-2 text-sm text-gray-500">{p.title}</span>
+                  )}
                 </li>
               )) : null}
             </ul>
@@ -336,9 +340,13 @@ export function Footer() {
             <ul className="space-y-3">
               {footerPages.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/page/${p.slug}`} className="text-sm hover:text-red-500 transition-colors">
-                    {p.title}
-                  </Link>
+                  {p.slug ? (
+                    <Link href={`/page/${p.slug}`} className="text-sm hover:text-red-500 transition-colors">
+                      {p.title}
+                    </Link>
+                  ) : (
+                    <span className="text-sm text-gray-500">{p.title}</span>
+                  )}
                 </li>
               ))}
             </ul>

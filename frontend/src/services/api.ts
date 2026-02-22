@@ -224,21 +224,50 @@ export const getSlides = async (): Promise<any[]> => {
 export interface CmsPage {
   id: number;
   title: string;
-  slug: string;
+  slug?: string;
 }
+
+/** Fallback slug by page id when API list does not return slug (e.g. /api/pages returns only id + title). */
+const CMS_PAGE_SLUG_BY_ID: Record<number, string> = {
+  2: 'conditions-generale-de-ventes-protein.tn',
+  5: 'qui-sommes-nous',
+  7: 'politique-de-remboursement',
+  8: 'politique-des-cookies',
+  9: 'proteine-tunisie',
+};
+
+/** Static list when API fails or returns empty so "Services & Ventes" always shows (excludes "Qui sommes nous"). */
+const CMS_PAGES_FALLBACK: CmsPage[] = [
+  { id: 2, title: 'Conditions générales de ventes - Protein.tn', slug: 'conditions-generale-de-ventes-protein.tn' },
+  { id: 7, title: 'Politique de remboursement', slug: 'politique-de-remboursement' },
+  { id: 8, title: 'Politique des Cookies', slug: 'politique-des-cookies' },
+  { id: 9, title: 'Proteine Tunisie', slug: 'proteine-tunisie' },
+];
 
 export const getCmsPages = async (): Promise<CmsPage[]> => {
   try {
-    const response = await axios.get<CmsPage[]>('https://admin.protein.tn/api/pages', {
-      timeout: 10000,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const response = await api.get<CmsPage[]>('/pages', { timeout: 10000 });
     const data = response.data;
-    return Array.isArray(data) ? data : [];
+    const list = Array.isArray(data) ? data : [];
+    if (list.length === 0) return CMS_PAGES_FALLBACK;
+    return list.map((p) => ({
+      ...p,
+      slug: p.slug ?? CMS_PAGE_SLUG_BY_ID[p.id] ?? slugFromTitle(p.title),
+    }));
   } catch {
-    return [];
+    return CMS_PAGES_FALLBACK;
   }
 };
+
+/** Generate URL-safe slug from title when API does not provide slug. */
+function slugFromTitle(title: string): string {
+  return (title || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 // Coordinates
 export const getCoordinates = async (): Promise<Coordinate> => {

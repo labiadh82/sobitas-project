@@ -34,7 +34,7 @@ export const ProductSection = memo(function ProductSection({
   viewAllLabel = 'Voir tout',
 }: ProductSectionProps) {
   return (
-    <section id={id} className="py-8 sm:py-12 md:py-20 bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <section id={id} className="py-8 sm:py-12 md:py-20 bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-14">
