@@ -184,7 +184,7 @@ export default function AboutPageClient() {
 
   // Always show all three key numbers - merge parsed with defaults
   const defaultKeyNumbers = [
-    { label: 'ans d\'expérience', value: '12+' },
+    { label: 'ans d\'expérience', value: '16+' },
     { label: 'Depuis', value: '2010' },
     { label: 'Livraison nationale', value: 'Toute la Tunisie' },
   ];

@@ -18,8 +18,8 @@ export function PromoBanner() {
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-red-900/50" />
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Content - z-10 so buttons stay above decorative blurs on mobile */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -62,9 +62,9 @@ export function PromoBanner() {
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-10 right-10 w-32 h-32 bg-red-600/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-10 right-1/4 w-40 h-40 bg-red-600/10 rounded-full blur-3xl" />
+      {/* Decorative Elements - pointer-events-none so they don't block button taps on mobile */}
+      <div className="absolute top-10 right-10 w-32 h-32 bg-red-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
     </section>
   );
 }

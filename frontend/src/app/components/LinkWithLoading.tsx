@@ -52,8 +52,10 @@ export function LinkWithLoading({
       return;
     }
 
-    // Internal links: let Next.js Link handle navigation (avoids 404 from custom prefetch+push cache)
+    // Internal links: show loading state but let Next.js Link handle navigation (avoids 404 from custom prefetch+push cache)
     if (isInternalLink(href)) {
+      setLoadingMessage(loadingMessage || 'Chargement...');
+      setLoading(true);
       return;
     }
 
