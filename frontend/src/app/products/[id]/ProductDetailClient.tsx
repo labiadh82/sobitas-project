@@ -423,7 +423,7 @@ export function ProductDetailClient({ product: initialProduct, similarProducts, 
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-6 lg:py-12 pb-44 lg:pb-12">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-6 lg:py-12 pb-32 sm:pb-40 lg:pb-12">
         {/* Breadcrumb: Accueil > Boutique > Category > Subcategory (ends at category, no product name) */}
         {breadcrumbItems.length > 0 && (
           <nav aria-label="Fil d'Ariane" className="mb-3 sm:mb-4 text-sm text-gray-500 dark:text-gray-400">
@@ -954,16 +954,16 @@ export function ProductDetailClient({ product: initialProduct, similarProducts, 
 
               return (
                 <Tabs defaultValue="description" className="w-full flex flex-col gap-4 sm:gap-5">
-                  {/* On mobile: horizontal scroll so "Valeurs nutritionnelles" etc. show in full; on sm+: equal-width tabs */}
-                  <TabsList className="flex w-full shrink-0 bg-gray-100 dark:bg-gray-900 rounded-lg sm:rounded-xl p-2 sm:p-1.5 gap-2 sm:gap-1.5 min-h-[44px] overflow-x-auto overflow-y-hidden flex-nowrap scrollbar-hide sm:overflow-visible">
-                    <TabsTrigger value="description" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone1 || 'Description'}>
+                  {/* On mobile: horizontal scroll with spacing so tabs never touch on very small screens; on sm+: equal-width tabs */}
+                  <TabsList className="flex w-full shrink-0 bg-gray-100 dark:bg-gray-900 rounded-lg sm:rounded-xl p-2 sm:p-1.5 gap-3 min-[400px]:gap-2 sm:gap-1.5 min-h-[44px] overflow-x-auto overflow-y-hidden flex-nowrap scrollbar-hide sm:overflow-visible">
+                    <TabsTrigger value="description" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-4 min-[400px]:px-3 sm:px-2 whitespace-nowrap sm:truncate mr-0" title={product.zone1 || 'Description'}>
                       {product.zone1 || 'Description'}
                     </TabsTrigger>
-                    <TabsTrigger value="nutrition" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone3 || 'Valeurs nutritionnelles'}>
+                    <TabsTrigger value="nutrition" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-4 min-[400px]:px-3 sm:px-2 whitespace-nowrap sm:truncate mr-0" title={product.zone3 || 'Valeurs nutritionnelles'}>
                       {product.zone3 || 'Valeurs nutritionnelles'}
                     </TabsTrigger>
                     {hasQuestions && (
-                      <TabsTrigger value="questions" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone4 || 'Questions'}>
+                      <TabsTrigger value="questions" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-4 min-[400px]:px-3 sm:px-2 whitespace-nowrap sm:truncate mr-0" title={product.zone4 || 'Questions'}>
                         {product.zone4 || 'Questions'}
                       </TabsTrigger>
                     )}
@@ -1150,15 +1150,25 @@ export function ProductDetailClient({ product: initialProduct, similarProducts, 
                   </div>
 
                   {/* See more: link to full reviews page (e.g. /shop/serious-mass-5-45-kg-optimum-nutrition/reviews) */}
-                  <Button variant="outline" className="w-full" size="default" asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full min-h-[44px] py-2.5 leading-snug text-left sm:text-center text-xs sm:text-sm whitespace-normal border-gray-300 dark:border-gray-600"
+                    size="default"
+                    asChild
+                  >
                     <Link
                       href={product.slug ? `/shop/${encodeURIComponent(product.slug)}/reviews` : `/products/${product.id}/reviews`}
-                      className="flex items-center justify-center gap-2"
+                      className="flex items-center justify-center gap-2 flex-wrap"
                     >
-                      {reviewCount > REVIEWS_ON_PRODUCT_PAGE
-                        ? `Voir plus d'avis (${reviewCount} au total)`
-                        : `Voir tous les avis (${reviewCount})`}
-                      <ChevronRight className="h-4 w-4" />
+                      <span className="inline sm:hidden">
+                        {reviewCount > REVIEWS_ON_PRODUCT_PAGE ? `Plus d'avis (${reviewCount})` : `Tous les avis (${reviewCount})`}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {reviewCount > REVIEWS_ON_PRODUCT_PAGE
+                          ? `Voir plus d'avis (${reviewCount} au total)`
+                          : `Voir tous les avis (${reviewCount})`}
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0" />
                     </Link>
                   </Button>
 

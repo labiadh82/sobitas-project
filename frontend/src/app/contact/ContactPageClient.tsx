@@ -79,23 +79,25 @@ export default function ContactPageClient() {
           {/* Contact Information */}
           <div className="space-y-6">
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-              {coordinates?.phone && (
-                <div className="flex items-start space-x-4 mb-6">
-                  <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg">
-                    <Phone className="h-6 w-6 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      Téléphone
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      <a href={`tel:${coordinates.phone}`} className="hover:text-red-600 dark:hover:text-red-400">
-                        {coordinates.phone}
-                      </a>
-                    </p>
-                  </div>
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg">
+                  <Phone className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-              )}
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                    Téléphone
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    <a href="tel:73200169" className="hover:text-red-600 dark:hover:text-red-400">
+                      73 200 169
+                    </a>
+                    <span className="mx-1">/</span>
+                    <a href="tel:27612500" className="hover:text-red-600 dark:hover:text-red-400">
+                      27 612 500
+                    </a>
+                  </p>
+                </div>
+              </div>
 
               {coordinates?.email && (
                 <div className="flex items-start space-x-4 mb-6">
@@ -140,9 +142,9 @@ export default function ContactPageClient() {
                     Horaires
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Monday → Saturday: 09:00 → 19:30
+                    Lundi → Samedi : 10 h – 19 h 30
                     <br />
-                    Sunday: 13:00 → 19:00
+                    Dimanche : 14 h – 19 h
                   </p>
                 </div>
               </div>

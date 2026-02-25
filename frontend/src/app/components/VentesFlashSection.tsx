@@ -177,9 +177,9 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
       <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Header Section - Completely Redesigned */}
         <div className="mb-12 sm:mb-16 md:mb-20">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8 mb-8 min-w-0">
             {/* Left: Title & Stats */}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 min-w-0 space-y-4">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -253,16 +253,16 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
               </motion.div>
             </div>
 
-            {/* Right: Countdown Timer - Large & Prominent; responsive for very small screens */}
+            {/* Right: Countdown Timer - Large & Prominent; constrained on large screens so it stays on screen */}
             {!countdown.isExpired && earliestExpiration && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                 whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, type: 'spring' }}
-                className="lg:flex-shrink-0 min-w-0 w-full max-w-full overflow-hidden"
+                className="w-full min-w-0 shrink-0 lg:max-w-[min(100%,22rem)] xl:max-w-[min(100%,26rem)] overflow-hidden"
               >
-                <div className="relative bg-gradient-to-br from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 rounded-2xl p-3 max-[320px]:p-2 max-[360px]:p-4 sm:p-6 lg:p-8 shadow-2xl border-2 border-red-400/50 dark:border-red-600/50 overflow-hidden">
+                <div className="relative bg-gradient-to-br from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 rounded-2xl p-3 max-[320px]:p-2 max-[360px]:p-4 sm:p-6 lg:p-5 xl:p-6 shadow-2xl border-2 border-red-400/50 dark:border-red-600/50 overflow-hidden">
                   {/* Pulsing background effect */}
                   <motion.div
                     className="absolute inset-0 rounded-2xl bg-red-500/30 blur-2xl"
@@ -283,75 +283,75 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
                         Temps restant
                       </span>
                     </div>
-                    <div className="grid grid-cols-4 gap-1 max-[320px]:gap-0.5 max-[360px]:gap-1.5 sm:gap-2 lg:gap-3 min-w-0">
+                    <div className="grid grid-cols-4 gap-1 max-[320px]:gap-0.5 max-[360px]:gap-1.5 sm:gap-2 lg:gap-2 xl:gap-3 min-w-0 w-full">
                       {countdown.days > 0 && (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-3 xl:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                           <AnimatePresence mode="wait">
                             <motion.div
                               key={countdown.days}
                               initial={{ scale: 0.5, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
                               exit={{ scale: 0.5, opacity: 0 }}
-                              className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
+                              className="text-2xl max-[320px]:text-xl max-[360px]:text-3xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black text-white tabular-nums leading-none"
                             >
                               {String(countdown.days).padStart(2, '0')}
                             </motion.div>
                           </AnimatePresence>
-                          <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
-                            <span className="hidden min-[321px]:block truncate" title="Jours">Jours</span>
-                            <span className="min-[321px]:hidden" title="Jours">J</span>
+                          <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-[10px] xl:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                            <span className="hidden min-[321px]:block lg:hidden xl:block truncate" title="Jours">Jours</span>
+                            <span className="min-[321px]:hidden lg:block xl:hidden" title="Jours">J</span>
                           </div>
                         </div>
                       )}
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-3 xl:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.hours}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
+                            className="text-2xl max-[320px]:text-xl max-[360px]:text-3xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.hours).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
-                          <span className="hidden min-[321px]:block truncate" title="Heures">Heures</span>
-                          <span className="min-[321px]:hidden" title="Heures">H</span>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-[10px] xl:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block lg:hidden xl:block truncate" title="Heures">Heures</span>
+                          <span className="min-[321px]:hidden lg:block xl:hidden" title="Heures">H</span>
                         </div>
                       </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-3 xl:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.minutes}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
+                            className="text-2xl max-[320px]:text-xl max-[360px]:text-3xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.minutes).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
-                          <span className="hidden min-[321px]:block truncate" title="Minutes">Minutes</span>
-                          <span className="min-[321px]:hidden" title="Minutes">Min</span>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-[10px] xl:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block lg:hidden xl:block truncate" title="Minutes">Minutes</span>
+                          <span className="min-[321px]:hidden lg:block xl:hidden" title="Minutes">Min</span>
                         </div>
                       </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-3 xl:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.seconds}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
+                            className="text-2xl max-[320px]:text-xl max-[360px]:text-3xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.seconds).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
-                          <span className="hidden min-[321px]:block truncate" title="Secondes">Secondes</span>
-                          <span className="min-[321px]:hidden" title="Secondes">Sec</span>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-[10px] xl:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block lg:hidden xl:block truncate" title="Secondes">Secondes</span>
+                          <span className="min-[321px]:hidden lg:block xl:hidden" title="Secondes">Sec</span>
                         </div>
                       </div>
                     </div>

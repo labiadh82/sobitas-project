@@ -87,9 +87,45 @@ function stripHtml(html: string): string {
   return decodeHtmlEntities(text);
 }
 
+// Normalize for comparison: single spaces, trimmed, NFC unicode
+function normalizeForCompare(s: string): string {
+  return (s || '')
+    .normalize('NFC')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 function getExcerpt(article: Article, maxLength: number = 140): string {
   const raw = article.description || article.description_fr || '';
-  const text = stripHtml(raw);
+  let text = stripHtml(raw).trim();
+  if (!text) return '';
+
+  // Remove duplicated title from the start so the excerpt shows only content, not the title again
+  const title = decodeHtmlEntities(article.designation_fr || '').trim();
+  if (title) {
+    const normalizedTitle = normalizeForCompare(title);
+
+    // 1) Exact prefix: first N chars match title (case/space insensitive)
+    if (text.length >= title.length && normalizeForCompare(text.slice(0, title.length)) === normalizedTitle) {
+      text = text.slice(title.length).replace(/^[\s.,?!:;-]+/, '').trim();
+    } else {
+      // 2) Normalized starts-with: find title as prefix in normalized form (handles encoding differences)
+      const normalizedText = normalizeForCompare(text);
+      if (normalizedText.startsWith(normalizedTitle)) {
+        // Remove roughly the title from the start (same length in original text to preserve accents)
+        const after = text.slice(title.length).replace(/^[\s.,?!:;-]+/, '').trim();
+        if (after.length > 0) text = after;
+      } else {
+        // 3) First sentence equals title (e.g. "Title. Rest of content")
+        const firstSentence = text.split(/[.?!]/)[0]?.trim() || '';
+        if (firstSentence && normalizeForCompare(firstSentence) === normalizedTitle) {
+          text = text.slice(firstSentence.length).replace(/^[\s.,?!:;-]+/, '').trim();
+        }
+      }
+    }
+  }
+
   if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + '…';

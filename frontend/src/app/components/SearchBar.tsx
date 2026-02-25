@@ -32,12 +32,15 @@ function SearchResults({
   isLoading,
   onProductClick,
   onViewAll,
+  /** When true (mobile): show all results in a scrollable list, no "see more" button */
+  showAllScrollable = false,
 }: {
   query: string;
   products: Product[];
   isLoading: boolean;
   onProductClick?: () => void;
   onViewAll?: () => void;
+  showAllScrollable?: boolean;
 }) {
   if (isLoading) {
     return (
@@ -65,9 +68,11 @@ function SearchResults({
     );
   }
 
-  return (
-    <div className="space-y-1">
-      {products.slice(0, MAX_SUGGESTIONS).map((product) => (
+  const listProducts = showAllScrollable ? products : products.slice(0, MAX_SUGGESTIONS);
+
+  const resultList = (
+    <div className={cn('space-y-1', showAllScrollable && 'pb-2')}>
+      {listProducts.map((product) => (
         <LinkWithLoading
           key={product.id}
           href={`/shop/${encodeURIComponent(product.slug ?? String(product.id))}`}
@@ -112,6 +117,28 @@ function SearchResults({
           <ArrowRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" aria-hidden />
         </LinkWithLoading>
       ))}
+    </div>
+  );
+
+  if (showAllScrollable) {
+    return (
+      <div className="h-full min-h-0 flex flex-col">
+        <p className="text-xs text-muted-foreground mb-2 shrink-0">
+          {products.length} résultat{products.length !== 1 ? 's' : ''}
+        </p>
+        <div
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden -mx-1 px-1"
+          style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
+          {resultList}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {resultList}
       <Button
         variant="ghost"
         className="w-full justify-center gap-2 border-t pt-3 mt-2"
@@ -127,7 +154,7 @@ function SearchResults({
           <ArrowRight className="h-4 w-4" />
         </LinkWithLoading>
       </Button>
-    </div>
+    </>
   );
 }
 
@@ -320,6 +347,7 @@ export function SearchBar({ variant = 'desktop', className }: SearchBarProps) {
                 isLoading={isLoading}
                 onProductClick={handleProductClick}
                 onViewAll={handleViewAll}
+                showAllScrollable
               />
             </div>
 

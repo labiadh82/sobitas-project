@@ -14,6 +14,9 @@ import { motion } from 'motion/react';
 import { getAllBrands, getStorageUrl } from '@/services/api';
 import type { Brand } from '@/types';
 import { LoadingSpinner } from '@/app/components/LoadingSpinner';
+import { Pagination } from '@/app/components/ui/pagination';
+
+const MOBILE_PAGE_SIZE = 10;
 
 // Helper to generate slug from name
 function nameToSlug(name: string): string {
@@ -34,6 +37,7 @@ export default function BrandsPageClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [navigatingToBrand, setNavigatingToBrand] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
 
   const handleBrandClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -67,6 +71,17 @@ export default function BrandsPageClient() {
       setFilteredBrands(filtered);
     }
   }, [searchQuery, brands]);
+
+  // Reset mobile page when search or results change
+  useEffect(() => {
+    setMobilePage(1);
+  }, [searchQuery, filteredBrands.length]);
+
+  const mobileTotalPages = Math.max(1, Math.ceil(filteredBrands.length / MOBILE_PAGE_SIZE));
+  const mobileBrandsSlice = filteredBrands.slice(
+    (mobilePage - 1) * MOBILE_PAGE_SIZE,
+    mobilePage * MOBILE_PAGE_SIZE
+  );
 
   if (isLoading) {
     return <LoadingSpinner fullScreen message="Chargement des marques..." />;
@@ -181,11 +196,30 @@ export default function BrandsPageClient() {
           </motion.div>
         ) : (
           <>
-            {/* Mobile: always use modern list with bigger logos */}
-            <div className="md:hidden space-y-3">
-              {filteredBrands.map((brand, index) => (
-                <BrandMobileListItem key={brand.id} brand={brand} index={index} onBrandClick={handleBrandClick} />
-              ))}
+            {/* Mobile: always use modern list with bigger logos + pagination */}
+            <div className="md:hidden">
+              <div className="space-y-3">
+                {mobileBrandsSlice.map((brand, index) => (
+                  <BrandMobileListItem
+                    key={brand.id}
+                    brand={brand}
+                    index={(mobilePage - 1) * MOBILE_PAGE_SIZE + index}
+                    onBrandClick={handleBrandClick}
+                  />
+                ))}
+              </div>
+              {mobileTotalPages > 1 && (
+                <div className="mt-6 flex flex-col items-center gap-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Page {mobilePage} sur {mobileTotalPages}
+                  </p>
+                  <Pagination
+                    currentPage={mobilePage}
+                    totalPages={mobileTotalPages}
+                    onPageChange={setMobilePage}
+                  />
+                </div>
+              )}
             </div>
             {/* Desktop: grid or list based on toggle */}
             <div className="hidden md:block">
