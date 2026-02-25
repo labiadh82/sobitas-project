@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BrandResource\Pages;
-use App\Models\Brand;
+use App\Filament\Resources\AromaResource\Pages;
+use App\Models\Aroma;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -11,19 +11,19 @@ use Filament\Tables;
 use Filament\Actions;
 use Filament\Tables\Table;
 
-class BrandResource extends Resource
+class AromaResource extends Resource
 {
-    protected static ?string $model = Brand::class;
+    protected static ?string $model = Aroma::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-storefront';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-sparkles';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Catalogue';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
-    protected static ?string $modelLabel = 'Marque';
+    protected static ?string $modelLabel = 'Aroma';
 
-    protected static ?string $pluralModelLabel = 'Marques';
+    protected static ?string $pluralModelLabel = 'Aromas';
 
     protected static ?string $recordTitleAttribute = 'designation_fr';
 
@@ -33,18 +33,8 @@ class BrandResource extends Resource
     {
         return $schema->schema([
             Forms\Components\TextInput::make('designation_fr')
-                ->label('Nom')
+                ->label('Désignation')
                 ->required()
-                ->maxLength(255),
-            Forms\Components\TextInput::make('logo')
-                ->label('Logo (chemin)')
-                ->maxLength(500),
-            Forms\Components\TextInput::make('alt_cover')
-                ->label('Alt image')
-                ->maxLength(255),
-            Forms\Components\TextInput::make('meta_title')
-                ->maxLength(255),
-            Forms\Components\TextInput::make('meta_description')
                 ->maxLength(255),
         ]);
     }
@@ -53,11 +43,8 @@ class BrandResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('logo')
-                    ->label('Logo')
-                    ->circular(),
                 Tables\Columns\TextColumn::make('designation_fr')
-                    ->label('Nom')
+                    ->label('Aroma')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('products_count')
@@ -76,8 +63,7 @@ class BrandResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageBrands::route('/'),
+            'index' => Pages\ManageAromas::route('/'),
         ];
     }
 }
-

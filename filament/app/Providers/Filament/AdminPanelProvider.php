@@ -12,8 +12,10 @@ use App\Filament\Pages\Stock\StockMovementsPage;
 use App\Filament\Pages\Stock\StockAlertsPage;
 use App\Filament\Pages\Stock\StockAdjustmentsPage;
 use App\Filament\Pages\Stock\StockReportsPage;
+use App\Filament\Pages\MediaPage;
 use App\Filament\Resources\AnnonceResource;
 use App\Filament\Resources\ArticleResource;
+use App\Filament\Resources\AromaResource;
 use App\Filament\Resources\BrandResource;
 use App\Filament\Resources\CategResource;
 use App\Filament\Resources\ClientResource;
@@ -100,6 +102,7 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 AnnonceResource::class,
                 ArticleResource::class,
+                AromaResource::class,
                 BrandResource::class,
                 CategResource::class,
                 ClientResource::class,
@@ -121,6 +124,7 @@ class AdminPanelProvider extends PanelProvider
                 ServiceResource::class,
                 SlideResource::class,
                 SousCategoryResource::class,
+                TagResource::class,
                 TicketResource::class,
                 UserResource::class,
             ])
@@ -128,6 +132,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
                 LowStockProducts::class,
                 SendSms::class,
+                MediaPage::class,
                 // Gestion de stock
                 StockDashboard::class,
                 StockProductsPage::class,
