@@ -642,7 +642,7 @@ export function Header() {
               </nav>
             </div>
 
-            {/* Account, Cart, Theme */}
+            {/* Account, Cart, Favoris, Theme */}
             <div className="mt-auto pt-4 px-4 border-t border-gray-200 dark:border-gray-800 space-y-0.5">
               <Button
                 variant="ghost"
@@ -652,6 +652,12 @@ export function Header() {
                 <ShoppingCart className="h-5 w-5 mr-3 shrink-0" />
                 Panier{cartItemsCount > 0 ? ` (${cartItemsCount})` : ''}
               </Button>
+              <Link href="/favoris" onClick={closeMobileMenu}>
+                <Button variant="ghost" className="w-full justify-start h-12 rounded-xl text-[15px] font-medium -mx-1">
+                  <Heart className={`h-5 w-5 mr-3 shrink-0 ${favoritesCount > 0 ? 'fill-red-600 text-red-600' : ''}`} />
+                  Favoris{favoritesCount > 0 ? ` (${favoritesCount})` : ''}
+                </Button>
+              </Link>
               {isAuthenticated ? (
                 <>
                   <Link href="/account" onClick={closeMobileMenu}>

@@ -148,7 +148,7 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
           className={`block size-full flex items-center justify-center ${isCompact ? 'p-2 md:p-3' : 'p-3 md:p-4 lg:p-5'}`}
           aria-label={`Voir ${productData.name}`}
-          loadingMessage={`Chargement de ${productData.name}...`}
+          loadingMessage="Chargement"
         >
           {productData.image ? (
             <Image
@@ -244,7 +244,7 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
         <LinkWithLoading 
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
           className="block mb-0 min-w-0 flex-shrink-0"
-          loadingMessage={`Chargement de ${productData.name}...`}
+          loadingMessage="Chargement"
         >
           <h3
             title={productData.name}

@@ -73,7 +73,7 @@ function SearchResults({
           href={`/shop/${encodeURIComponent(product.slug ?? String(product.id))}`}
           onClick={onProductClick}
           className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800 focus:outline-none"
-          loadingMessage={`Chargement de ${product.designation_fr}...`}
+          loadingMessage="Chargement"
         >
           <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
             {product.cover ? (

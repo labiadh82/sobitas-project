@@ -118,7 +118,7 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
           className="block size-full" 
           aria-label={`Voir ${productData.name}`}
-          loadingMessage={`Chargement de ${productData.name}...`}
+          loadingMessage="Chargement"
         >
           {productData.image ? (
             <Image
@@ -198,7 +198,7 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
         <LinkWithLoading 
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
           className="block mb-1.5 sm:mb-2.5 min-w-0 flex-shrink-0"
-          loadingMessage={`Chargement de ${productData.name}...`}
+          loadingMessage="Chargement"
         >
           <h3
             title={productData.name}
