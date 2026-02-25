@@ -125,10 +125,15 @@ class CommandeResource extends Resource
                     ->label('N°')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nom')
+                Tables\Columns\TextColumn::make('client_name')
                     ->label('Client')
-                    ->formatStateUsing(fn ($record) => $record->full_name)
-                    ->searchable(['nom', 'prenom']),
+                    ->getStateUsing(fn (Commande $record): string => $record->full_name)
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function (Builder $q) use ($search) {
+                            $q->where('nom', 'like', "%{$search}%")
+                                ->orWhere('prenom', 'like', "%{$search}%");
+                        });
+                    }),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Tél.')
                     ->searchable(),

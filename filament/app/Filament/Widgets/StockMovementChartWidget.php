@@ -12,9 +12,9 @@ class StockMovementChartWidget extends ChartWidget
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?string $heading = 'Mouvements de stock (7 derniers jours)';
+    protected ?string $heading = 'Mouvements de stock (7 derniers jours)';
 
-    protected static ?string $maxHeight = '200px';
+    protected ?string $maxHeight = '200px';
 
     public ?string $filter = '7';
 
