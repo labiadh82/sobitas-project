@@ -19,7 +19,7 @@ class StockReportsPage extends Page
 
     protected static ?int $navigationSort = 6;
 
-    protected static string $view = 'filament.pages.stock.stock-reports-page';
+    protected string $view = 'filament.pages.stock.stock-reports-page';
 
     public static function getSlug(): string
     {

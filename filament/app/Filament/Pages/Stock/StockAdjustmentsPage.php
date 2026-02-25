@@ -26,7 +26,7 @@ class StockAdjustmentsPage extends Page implements HasForms
 
     protected static ?int $navigationSort = 5;
 
-    protected static string $view = 'filament.pages.stock.stock-adjustments-page';
+    protected string $view = 'filament.pages.stock.stock-adjustments-page';
 
     public ?array $data = [];
 

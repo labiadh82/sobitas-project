@@ -28,7 +28,7 @@ class StockProductsPage extends Page implements HasTable
 
     protected static ?int $navigationSort = 2;
 
-    protected static string $view = 'filament.pages.stock.stock-products-page';
+    protected string $view = 'filament.pages.stock.stock-products-page';
 
     public static function getSlug(): string
     {

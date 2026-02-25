@@ -16,7 +16,7 @@ class StockDashboard extends Page
 
     protected static ?int $navigationSort = 1;
 
-    protected static string $view = 'filament.pages.stock.stock-dashboard';
+    protected string $view = 'filament.pages.stock.stock-dashboard';
 
     public static function getSlug(): string
     {
