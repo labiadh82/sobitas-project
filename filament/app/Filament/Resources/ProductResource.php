@@ -163,7 +163,7 @@ class ProductResource extends Resource
                     ->label('Image')
                     ->disk('public')
                     ->circular()
-                    ->size(40),
+                    ->size(72),
                 Tables\Columns\TextColumn::make('designation_fr')
                     ->label('Désignation')
                     ->searchable()
