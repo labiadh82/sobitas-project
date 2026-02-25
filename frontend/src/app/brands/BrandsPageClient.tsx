@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/app/components/Header';
 import { Footer } from '@/app/components/Footer';
 import { ScrollToTop } from '@/app/components/ScrollToTop';
@@ -26,11 +27,19 @@ function nameToSlug(name: string): string {
 }
 
 export default function BrandsPageClient() {
+  const router = useRouter();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [navigatingToBrand, setNavigatingToBrand] = useState(false);
+
+  const handleBrandClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    setNavigatingToBrand(true);
+    router.push(href);
+  };
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -64,7 +73,14 @@ export default function BrandsPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative">
+      {/* Full-screen loading overlay when navigating to a brand */}
+      {navigatingToBrand && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 dark:bg-gray-950/90 backdrop-blur-sm">
+          <LoadingSpinner fullScreen message="Chargement de la marque..." />
+        </div>
+      )}
+
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -106,8 +122,8 @@ export default function BrandsPageClient() {
             />
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+          {/* View Mode Toggle - hidden on mobile (mobile always uses list) */}
+          <div className="hidden md:flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
@@ -163,18 +179,31 @@ export default function BrandsPageClient() {
               Réinitialiser la recherche
             </Button>
           </motion.div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {filteredBrands.map((brand, index) => (
-              <BrandCard key={brand.id} brand={brand} index={index} />
-            ))}
-          </div>
         ) : (
-          <div className="space-y-4">
-            {filteredBrands.map((brand, index) => (
-              <BrandListItem key={brand.id} brand={brand} index={index} />
-            ))}
-          </div>
+          <>
+            {/* Mobile: always use modern list with bigger logos */}
+            <div className="md:hidden space-y-3">
+              {filteredBrands.map((brand, index) => (
+                <BrandMobileListItem key={brand.id} brand={brand} index={index} onBrandClick={handleBrandClick} />
+              ))}
+            </div>
+            {/* Desktop: grid or list based on toggle */}
+            <div className="hidden md:block">
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {filteredBrands.map((brand, index) => (
+                    <BrandCard key={brand.id} brand={brand} index={index} onBrandClick={handleBrandClick} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredBrands.map((brand, index) => (
+                    <BrandListItem key={brand.id} brand={brand} index={index} onBrandClick={handleBrandClick} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </main>
 
@@ -184,10 +213,11 @@ export default function BrandsPageClient() {
   );
 }
 
-// Brand Card Component (Grid View)
-function BrandCard({ brand, index }: { brand: Brand; index: number }) {
+// Brand Card Component (Grid View - desktop only)
+function BrandCard({ brand, index, onBrandClick }: { brand: Brand; index: number; onBrandClick: (e: React.MouseEvent, href: string) => void }) {
   const [imageError, setImageError] = useState(false);
   const logoUrl = brand.logo ? getStorageUrl(brand.logo) : null;
+  const href = `/brand/${nameToSlug(brand.designation_fr)}`;
 
   return (
     <motion.div
@@ -197,7 +227,8 @@ function BrandCard({ brand, index }: { brand: Brand; index: number }) {
       className="group"
     >
       <Link
-        href={`/brand/${nameToSlug(brand.designation_fr)}`}
+        href={href}
+        onClick={(e) => onBrandClick(e, href)}
         className="block bg-white dark:bg-gray-800 rounded-2xl p-6 h-48 flex flex-col items-center justify-center border border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-xl transition-all duration-300"
       >
         {logoUrl && !imageError ? (
@@ -207,7 +238,7 @@ function BrandCard({ brand, index }: { brand: Brand; index: number }) {
               alt={brand.designation_fr || brand.alt_cover || 'Brand logo'}
               fill
               className="object-contain p-3 group-hover:scale-110 transition-transform duration-300"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 22vw"
+              sizes="(max-width: 1024px) 33vw, 22vw"
               loading="lazy"
               unoptimized
               onError={() => {
@@ -231,10 +262,63 @@ function BrandCard({ brand, index }: { brand: Brand; index: number }) {
   );
 }
 
-// Brand List Item Component (List View)
-function BrandListItem({ brand, index }: { brand: Brand; index: number }) {
+// Mobile-only: list row with large logo and modern card
+function BrandMobileListItem({ brand, index, onBrandClick }: { brand: Brand; index: number; onBrandClick: (e: React.MouseEvent, href: string) => void }) {
   const [imageError, setImageError] = useState(false);
   const logoUrl = brand.logo ? getStorageUrl(brand.logo) : null;
+  const href = `/brand/${nameToSlug(brand.designation_fr)}`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -16 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: Math.min(index * 0.04, 0.3) }}
+    >
+      <Link
+        href={href}
+        onClick={(e) => onBrandClick(e, href)}
+        className="flex items-center gap-4 w-full bg-white dark:bg-gray-800/90 rounded-2xl p-4 min-h-[120px] border border-gray-200/80 dark:border-gray-700/80 hover:border-red-400 dark:hover:border-red-500 hover:shadow-lg active:scale-[0.99] transition-all duration-200 touch-manipulation"
+      >
+        {/* Large logo container - prominent on mobile */}
+        <div className="relative w-28 h-28 flex-shrink-0 rounded-xl bg-gray-50 dark:bg-gray-900/80 overflow-hidden border border-gray-100 dark:border-gray-800">
+          {logoUrl && !imageError ? (
+            <Image
+              src={logoUrl}
+              alt={brand.designation_fr || brand.alt_cover || 'Brand logo'}
+              fill
+              className="object-contain p-2.5"
+              sizes="112px"
+              loading="lazy"
+              unoptimized
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Building2 className="h-10 w-10 text-gray-400" />
+            </div>
+          )}
+        </div>
+
+        {/* Brand name + CTA */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate pr-2">
+            {brand.designation_fr}
+          </h3>
+          <div className="flex items-center text-red-600 dark:text-red-400 font-semibold text-sm">
+            <span>Voir les produits</span>
+            <ArrowRight className="h-4 w-4 ml-1.5 flex-shrink-0" />
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+// Brand List Item Component (List View)
+function BrandListItem({ brand, index, onBrandClick }: { brand: Brand; index: number; onBrandClick: (e: React.MouseEvent, href: string) => void }) {
+  const [imageError, setImageError] = useState(false);
+  const logoUrl = brand.logo ? getStorageUrl(brand.logo) : null;
+  const href = `/brand/${nameToSlug(brand.designation_fr)}`;
 
   return (
     <motion.div
@@ -243,7 +327,8 @@ function BrandListItem({ brand, index }: { brand: Brand; index: number }) {
       transition={{ delay: index * 0.05 }}
     >
       <Link
-        href={`/brand/${nameToSlug(brand.designation_fr)}`}
+        href={href}
+        onClick={(e) => onBrandClick(e, href)}
         className="block bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-lg transition-all duration-300 group"
       >
         <div className="flex items-center gap-6">

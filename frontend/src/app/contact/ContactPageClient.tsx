@@ -140,7 +140,9 @@ export default function ContactPageClient() {
                     Horaires
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Lun - Sam: 9h00 - 19h00
+                    Monday → Saturday: 09:00 → 19:30
+                    <br />
+                    Sunday: 13:00 → 19:00
                   </p>
                 </div>
               </div>

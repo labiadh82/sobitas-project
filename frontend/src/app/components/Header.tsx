@@ -239,14 +239,14 @@ export function Header() {
               scrolled ? 'h-12 py-2' : 'h-14 py-2.5'
             )}
           >
-            {/* Logo - Left aligned */}
-            <Link href="/" className="flex items-center justify-start flex-1 min-w-0 max-w-[8rem] sm:max-w-[9rem] -ml-2" aria-label="Protein.tn - Accueil">
+            {/* Logo - Left aligned; larger on small screens for visibility */}
+            <Link href="/" className="flex items-center justify-start flex-1 min-w-0 max-w-[11rem] sm:max-w-[12rem] -ml-1" aria-label="Protein.tn - Accueil">
               <Image
                 src={getStorageUrl('coordonnees/September2023/OXC3oL0LreP3RCsgR3k6.webp')}
                 alt="Protein.tn"
-                width={120}
-                height={40}
-                className="w-full h-auto object-contain drop-shadow-sm transition-all duration-300"
+                width={140}
+                height={48}
+                className="h-9 min-h-[36px] w-auto max-w-full object-contain object-left drop-shadow-sm transition-all duration-300"
                 style={{ width: 'auto', height: 'auto' }}
                 priority
               />
@@ -254,21 +254,6 @@ export function Header() {
 
             <div className="flex items-center gap-0 flex-shrink-0">
               <SearchBar variant="mobile" className="-mr-0.5" />
-              <Link href="/favoris">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative h-12 w-12 min-h-[48px] min-w-[48px] flex-shrink-0 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-                  aria-label={favoritesCount > 0 ? `Favoris - ${favoritesCount} produit${favoritesCount > 1 ? 's' : ''}` : 'Favoris'}
-                >
-                  <Heart className="h-6 w-6" aria-hidden />
-                  {favoritesCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-600 text-white text-[10px] font-bold rounded-full">
-                      {favoritesCount > 99 ? '99+' : favoritesCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
               <Button
                 variant="ghost"
                 size="icon"

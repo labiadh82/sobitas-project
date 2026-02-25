@@ -239,15 +239,18 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
         </div>
       </div>
 
-      {/* Content – reduced padding, typography tuned for md */}
-      <div className="flex flex-col flex-1 min-h-0 p-2.5 sm:p-3 md:p-3 lg:p-4">
+      {/* Content – flexible layout; responsive padding for very small screens */}
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 p-2 max-[320px]:p-1.5 max-[360px]:p-2 sm:p-3 md:p-3 lg:p-4 gap-0.5 sm:gap-1">
         <LinkWithLoading 
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
-          className="block mb-0.5 md:mb-1"
+          className="block mb-0 min-w-0 flex-shrink-0"
           loadingMessage={`Chargement de ${productData.name}...`}
         >
           <h3
-            className={`font-semibold text-gray-900 dark:text-white line-clamp-2 leading-tight md:leading-snug transition-colors group-hover:text-red-600 dark:group-hover:text-red-400 ${isCompact ? 'text-[13px] sm:text-sm md:text-[15px] lg:text-base' : 'text-sm sm:text-base md:text-[15px] lg:text-base'}`}
+            title={productData.name}
+            className={`font-semibold text-gray-900 dark:text-white leading-tight overflow-hidden transition-colors group-hover:text-red-600 dark:group-hover:text-red-400
+              line-clamp-4 min-[361px]:line-clamp-3
+              ${isCompact ? 'text-[13px] max-[360px]:text-[11px] sm:text-sm md:text-[15px] lg:text-base' : 'text-sm max-[360px]:text-xs sm:text-base md:text-[15px] lg:text-base'}`}
           >
             {productData.name}
           </h3>
@@ -261,10 +264,10 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
 
         {/* No rating/avis on listing cards – only on product detail page */}
         {/* Price – promo + old price only when hasPromo (active promo, not expired) */}
-        <div className={`flex flex-wrap items-baseline gap-1 sm:gap-1.5 md:gap-2 mt-auto ${isCompact ? 'mb-0' : 'mb-0'}`}>
+        <div className={`flex flex-wrap items-baseline gap-1 sm:gap-1.5 md:gap-2 mt-auto min-w-0 ${isCompact ? 'mb-0' : 'mb-0'}`}>
           {productData.priceDisplay.hasPromo && productData.priceDisplay.oldPrice != null ? (
             <>
-              <span className={`font-bold text-red-600 dark:text-red-400 tabular-nums ${isCompact ? 'text-sm' : 'text-base sm:text-lg md:text-xl'}`}>
+              <span className={`font-bold text-red-600 dark:text-red-400 tabular-nums ${isCompact ? 'text-sm' : 'text-sm max-[360px]:text-xs sm:text-base md:text-lg lg:text-xl'}`}>
                 {productData.priceDisplay.finalPrice} DT
               </span>
               <span
@@ -281,24 +284,29 @@ export const ProductCard = memo(function ProductCard({ product, showBadge, badge
               )}
             </>
           ) : (
-            <span className={`font-bold text-gray-900 dark:text-white tabular-nums ${isCompact ? 'text-sm' : 'text-base sm:text-lg md:text-xl'}`}>
+            <span className={`font-bold text-gray-900 dark:text-white tabular-nums ${isCompact ? 'text-sm' : 'text-sm max-[360px]:text-xs sm:text-base md:text-lg lg:text-xl'}`}>
               {productData.priceDisplay.finalPrice} DT
             </span>
           )}
         </div>
 
-        {/* CTA – Ajouter au panier; visible on mobile/tablet (desktop has overlay) */}
-        <div className="flex-shrink-0 pt-2 md:pt-3 mt-1.5 md:mt-2 border-t border-gray-100 dark:border-gray-600/80 lg:hidden block">
+        {/* CTA – "Ajouter" on mobile (one line), "Ajouter au panier" on desktop; visible on mobile/tablet (desktop has overlay) */}
+        <div className="flex-shrink-0 pt-1.5 max-[360px]:pt-1 md:pt-3 mt-1 md:mt-2 border-t border-gray-100 dark:border-gray-600/80 lg:hidden block">
           <Button
             size="sm"
-            className={`w-full min-h-[44px] rounded-xl font-semibold text-[10px] xs:text-[11px] sm:text-sm active:scale-[0.98] transition-transform duration-150 select-none px-1.5 sm:px-2 ${productData.isInStock && canAddMore ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white'}`}
+            className={`w-full min-h-[40px] max-[360px]:min-h-[38px] rounded-xl font-semibold text-[11px] max-[360px]:text-[10px] sm:text-sm active:scale-[0.98] transition-transform duration-150 select-none px-2 whitespace-nowrap ${productData.isInStock && canAddMore ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white'}`}
             onClick={handleAddToCart}
             disabled={isAdding || !productData.isInStock || !canAddMore}
             aria-label={`Ajouter ${productData.name} au panier`}
           >
             <ShoppingCart className={`size-3.5 sm:size-4 shrink-0 mr-1 sm:mr-1.5 ${isCompact ? 'sm:mr-1.5' : ''}`} aria-hidden="true" />
-            <span className="truncate max-w-full">
-              {!productData.isInStock || stockDisponible <= 0 ? 'Rupture' : !canAddMore ? 'Stock max' : isAdding ? 'Ajouté !' : 'Ajouter au panier'}
+            <span className="truncate">
+              {!productData.isInStock || stockDisponible <= 0 ? 'Rupture' : !canAddMore ? 'Stock max' : isAdding ? 'Ajouté !' : (
+                <>
+                  <span className="sm:hidden">Ajouter</span>
+                  <span className="hidden sm:inline">Ajouter au panier</span>
+                </>
+              )}
             </span>
           </Button>
         </div>

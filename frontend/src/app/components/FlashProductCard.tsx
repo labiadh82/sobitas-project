@@ -192,15 +192,18 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
         )}
       </div>
 
-      {/* Content Section */}
-      <div className="relative flex flex-col flex-1 min-h-0 p-3 sm:p-4 md:p-5 overflow-hidden">
-        {/* Product Name */}
+      {/* Content Section – flexible layout for very small screens */}
+      <div className="relative flex flex-col flex-1 min-h-0 min-w-0 p-2 max-[320px]:p-1.5 max-[360px]:p-2 sm:p-4 md:p-5 overflow-hidden">
+        {/* Product Name – 2 lines on very small, 3 on larger mobile; full name in title for tooltip */}
         <LinkWithLoading 
           href={`/shop/${encodeURIComponent(productData.slug || String(product.id))}`} 
-          className="block mb-2 sm:mb-2.5"
+          className="block mb-1.5 sm:mb-2.5 min-w-0 flex-shrink-0"
           loadingMessage={`Chargement de ${productData.name}...`}
         >
-          <h3 className="font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug transition-colors group-hover:text-red-600 dark:group-hover:text-red-400 text-sm sm:text-base md:text-lg min-h-[2.5rem] sm:min-h-[2.75rem]">
+          <h3
+            title={productData.name}
+            className="font-bold text-gray-900 dark:text-white leading-snug overflow-hidden transition-colors group-hover:text-red-600 dark:group-hover:text-red-400 text-sm max-[360px]:text-xs sm:text-base md:text-lg line-clamp-4 min-[361px]:line-clamp-3"
+          >
             {productData.name}
           </h3>
         </LinkWithLoading>
@@ -243,8 +246,8 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
           )}
         </div>
 
-        {/* CTA Button - Always visible with enhanced design, constrained to card */}
-        <div className="mt-auto pt-2 sm:pt-2.5">
+        {/* CTA Button – "Ajouter" on mobile (one line), longer label on desktop */}
+        <div className="mt-auto pt-1.5 max-[360px]:pt-1 sm:pt-2.5">
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -252,10 +255,10 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
           >
             <Button
               size="lg"
-              className="w-full min-h-[44px] sm:min-h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-red-600 via-red-600 to-orange-600 hover:from-red-700 hover:via-red-700 hover:to-orange-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/btn"
+              className="w-full min-h-[40px] max-[360px]:min-h-[38px] sm:min-h-[44px] md:min-h-[48px] rounded-xl font-black text-[11px] max-[360px]:text-[10px] sm:text-sm bg-gradient-to-r from-red-600 via-red-600 to-orange-600 hover:from-red-700 hover:via-red-700 hover:to-orange-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group/btn whitespace-nowrap"
               onClick={handleAddToCart}
               disabled={isAdding || !productData.isInStock || !canAddMore}
-              aria-label={!canAddMore && productData.isInStock ? 'Stock maximum atteint' : `${productData.isInStock ? 'Acheter' : 'Rupture de stock'} ${productData.name}`}
+              aria-label={!canAddMore && productData.isInStock ? 'Stock maximum atteint' : `Ajouter ${productData.name} au panier`}
             >
               {/* Shine effect on hover */}
               <motion.div
@@ -265,12 +268,17 @@ export const FlashProductCard = memo(function FlashProductCard({ product }: Flas
               <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 relative z-10 flex-shrink-0" aria-hidden="true" />
               <span className="relative z-10 truncate">
                 {!productData.isInStock || stockDisponible <= 0
-                  ? 'Rupture de stock'
+                  ? 'Rupture'
                   : !canAddMore
-                  ? 'Stock max' 
-                  : isAdding 
-                  ? 'Ajouté ! ✓' 
-                  : 'Acheter maintenant'}
+                  ? 'Stock max'
+                  : isAdding
+                  ? 'Ajouté ! ✓'
+                  : (
+                    <>
+                      <span className="sm:hidden">Ajouter</span>
+                      <span className="hidden sm:inline">Acheter maintenant</span>
+                    </>
+                  )}
               </span>
             </Button>
           </motion.div>

@@ -1171,8 +1171,8 @@ function ShopContent({ productsData, categories, brands, initialCategory, isSubc
               </div>
             ) : (
               <>
-                {/* Grid: 2 cols mobile/md (wider cards on tablet), 3 lg, 4 xl. Min card width respected via 2 cols on md. */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6 min-w-0">
+                {/* Grid: 2 cols mobile; smaller gap on very small screens so cards stay readable. */}
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 max-[360px]:gap-1.5 sm:gap-4 md:gap-5 lg:gap-6 min-w-0">
                   {paginatedProducts.map(product => (
                     <ProductCard
                       key={product.id}

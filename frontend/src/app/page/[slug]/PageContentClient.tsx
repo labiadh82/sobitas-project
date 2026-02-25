@@ -83,6 +83,7 @@ export function PageContentClient({ page }: PageContentClientProps) {
                 prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold
                 prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-ol:text-gray-700 dark:prose-ol:text-gray-300
                 prose-li:text-gray-700 dark:prose-li:text-gray-300
+                [&>h1:first-of-type]:hidden
                 [&>h1]:text-3xl md:[&>h1]:text-4xl lg:[&>h1]:text-5xl [&>h1]:font-bold [&>h1]:mt-12 md:[&>h1]:mt-16 [&>h1]:mb-6 md:[&>h1]:mb-8 [&>h1]:text-gray-900 dark:[&>h1]:text-white [&>h1]:border-b-2 [&>h1]:border-red-600 [&>h1]:pb-4
                 [&>h2]:text-2xl md:[&>h2]:text-3xl lg:[&>h2]:text-4xl [&>h2]:font-bold [&>h2]:mt-10 md:[&>h2]:mt-12 [&>h2]:mb-4 md:[&>h2]:mb-6 [&>h2]:text-gray-900 dark:[&>h2]:text-white [&>h2]:flex [&>h2]:items-center [&>h2]:gap-3
                 [&>h3]:text-xl md:[&>h3]:text-2xl lg:[&>h3]:text-3xl [&>h3]:font-semibold [&>h3]:mt-8 md:[&>h3]:mt-10 [&>h3]:mb-3 md:[&>h3]:mb-5 [&>h3]:text-gray-800 dark:[&>h3]:text-gray-200

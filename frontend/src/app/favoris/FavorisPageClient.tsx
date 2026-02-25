@@ -34,7 +34,7 @@ export function FavorisPageClient() {
             : `${count} produit${count > 1 ? 's' : ''} en favoris`}
         </p>
         {count > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-[360px]:gap-1.5 sm:gap-4 lg:gap-6">
             {productsAsProduct.map((product) => (
               <ProductCard key={product.id} product={product} variant="compact" />
             ))}

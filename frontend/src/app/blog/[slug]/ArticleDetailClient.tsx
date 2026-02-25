@@ -86,6 +86,26 @@ function calculateReadingTime(content: string): number {
   return Math.max(1, Math.ceil(words / wordsPerMinute));
 }
 
+/** Split article HTML so we can insert "Produits recommandés" in the middle (after ~2nd paragraph). */
+function splitContentForMiddleInsert(html: string): [string, string] {
+  if (!html || !html.trim()) return ['', ''];
+  const closeP = /<\/p\s*>/gi;
+  let match: RegExpExecArray | null;
+  let count = 0;
+  let lastIndex = 0;
+  while ((match = closeP.exec(html)) !== null && count < 2) {
+    count++;
+    lastIndex = match.index + match[0].length;
+  }
+  if (count >= 2) {
+    return [html.slice(0, lastIndex), html.slice(lastIndex)];
+  }
+  if (count === 1) {
+    return [html.slice(0, lastIndex), html.slice(lastIndex)];
+  }
+  return [html, ''];
+}
+
 const CHATGPT_BASE = 'https://chat.openai.com/';
 /** Max length for ChatGPT ?q= param (browser URL limits); longer prompts go to clipboard only */
 const CHATGPT_QUERY_MAX_LEN = 2000;
@@ -97,6 +117,7 @@ export function ArticleDetailClient({ article, relatedArticles, children }: Arti
   const articleDate = article.created_at ? new Date(article.created_at) : new Date();
   const content = article.description_fr || article.description || '';
   const readingTime = useMemo(() => calculateReadingTime(content), [content]);
+  const [contentBefore, contentAfter] = useMemo(() => splitContentForMiddleInsert(content), [content]);
 
   useEffect(() => {
     setMounted(true);
@@ -230,24 +251,51 @@ export function ArticleDetailClient({ article, relatedArticles, children }: Arti
               </div>
             )}
 
-            {/* Article Content – links inside content styled as clear, clickable (backlinks open in new tab) */}
+            {/* Article Content – first part, then "Achetez les produits de cet article" in the middle, then rest of content */}
             <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 lg:pb-12">
-              <div 
-                ref={contentRef}
-                className="article-content prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none
-                  prose-headings:text-gray-900 dark:prose-headings:text-white
-                  prose-p:text-gray-700 dark:prose-p:text-gray-300
-                  prose-strong:text-gray-900 dark:prose-strong:text-white
-                  prose-ul:text-gray-700 dark:prose-ul:text-gray-300
-                  prose-ol:text-gray-700 dark:prose-ol:text-gray-300
-                  prose-li:text-gray-700 dark:prose-li:text-gray-300
-                  prose-img:rounded-lg prose-img:shadow-md
-                  prose-blockquote:border-l-red-600 dark:prose-blockquote:border-l-red-400
-                  prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
-                  prose-code:text-red-600 dark:prose-code:text-red-400
-                  prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
-                dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(content) }}
-              />
+              <div ref={contentRef}>
+                {contentBefore && (
+                  <div
+                    className="article-content prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none
+                      prose-headings:text-gray-900 dark:prose-headings:text-white
+                      prose-p:text-gray-700 dark:prose-p:text-gray-300
+                      prose-strong:text-gray-900 dark:prose-strong:text-white
+                      prose-ul:text-gray-700 dark:prose-ul:text-gray-300
+                      prose-ol:text-gray-700 dark:prose-ol:text-gray-300
+                      prose-li:text-gray-700 dark:prose-li:text-gray-300
+                      prose-img:rounded-lg prose-img:shadow-md
+                      prose-blockquote:border-l-red-600 dark:prose-blockquote:border-l-red-400
+                      prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
+                      prose-code:text-red-600 dark:prose-code:text-red-400
+                      prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+                    dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(contentBefore) }}
+                  />
+                )}
+                <BlogRecommendedProducts
+                  article={article}
+                  categorySlug={article.category_slug}
+                  recommendedProductSlugs={article.recommended_product_slugs ?? []}
+                  title="Achetez les produits de cet article"
+                  variant="inline"
+                />
+                {contentAfter && (
+                  <div
+                    className="article-content prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none
+                      prose-headings:text-gray-900 dark:prose-headings:text-white
+                      prose-p:text-gray-700 dark:prose-p:text-gray-300
+                      prose-strong:text-gray-900 dark:prose-strong:text-white
+                      prose-ul:text-gray-700 dark:prose-ul:text-gray-300
+                      prose-ol:text-gray-700 dark:prose-ol:text-gray-300
+                      prose-li:text-gray-700 dark:prose-li:text-gray-300
+                      prose-img:rounded-lg prose-img:shadow-md
+                      prose-blockquote:border-l-red-600 dark:prose-blockquote:border-l-red-400
+                      prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400
+                      prose-code:text-red-600 dark:prose-code:text-red-400
+                      prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+                    dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(contentAfter) }}
+                  />
+                )}
+              </div>
               {children}
             </div>
           </article>
@@ -268,13 +316,6 @@ export function ArticleDetailClient({ article, relatedArticles, children }: Arti
               </p>
             </div>
           )}
-
-          {/* Produits recommandés – lazy-loaded, 4–8 products (category / best sellers) */}
-          <BlogRecommendedProducts
-            article={article}
-            categorySlug={article.category_slug}
-            recommendedProductSlugs={article.recommended_product_slugs ?? []}
-          />
 
           {/* Related Articles */}
           {relatedArticles.length > 0 && (

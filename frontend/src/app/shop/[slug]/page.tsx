@@ -154,7 +154,7 @@ export default async function ShopProductPage({ params, searchParams }: PageProp
   const sub = safeProduct.sous_categorie;
   if (cat?.slug) breadcrumbItems.push({ name: cat.designation_fr || cat.slug, url: `/category/${cat.slug}` });
   if (sub?.slug && sub.slug !== cat?.slug) breadcrumbItems.push({ name: sub.designation_fr || sub.slug, url: `/category/${sub.slug}` });
-  breadcrumbItems.push({ name: safeProduct.designation_fr, url: `/shop/${cleanSlug}` });
+  /* Breadcrumb ends at category/subcategory; product name is not shown in the trail */
   const breadcrumbSchema = buildBreadcrumbListSchema(breadcrumbItems, baseUrl);
   validateStructuredData(breadcrumbSchema, 'BreadcrumbList');
   const webPageSchema = buildWebPageSchema(safeProduct.designation_fr, `/shop/${cleanSlug}`, baseUrl, {

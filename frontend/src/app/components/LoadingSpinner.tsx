@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import { getStorageUrl } from '@/services/api';
 import { motion } from 'motion/react';
 
 interface LoadingSpinnerProps {
@@ -10,49 +8,55 @@ interface LoadingSpinnerProps {
   message?: string;
 }
 
-export function LoadingSpinner({ 
-  size = 'md', 
+/**
+ * Same loading experience as "Voir les offres" (GlobalLoader): overlay + card + CSS spinner + message.
+ * Used across the app for consistency (blog, brands, account, login, Suspense fallbacks, etc.).
+ */
+export function LoadingSpinner({
+  size = 'md',
   fullScreen = false,
-  message 
+  message = 'Chargement...',
 }: LoadingSpinnerProps) {
-  const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-16 w-16',
-    lg: 'h-24 w-24',
+  const spinnerSizeClasses = {
+    sm: 'h-5 w-5 border-2',
+    md: 'h-6 w-6 border-2',
+    lg: 'h-8 w-8 border-2',
   };
 
-  const containerClasses = fullScreen
-    ? 'min-h-screen flex items-center justify-center bg-white dark:bg-gray-950'
-    : 'flex items-center justify-center p-8';
+  const card = (
+    <motion.div
+      initial={fullScreen ? { scale: 0.95, opacity: 0 } : undefined}
+      animate={{ scale: 1, opacity: 1 }}
+      className="bg-white dark:bg-gray-800 rounded-xl px-5 py-4 shadow-xl flex items-center gap-3 min-w-[200px] justify-center"
+    >
+      <div
+        className={`shrink-0 rounded-full border-gray-200 dark:border-gray-600 border-t-red-600 dark:border-t-red-500 animate-spin ${spinnerSizeClasses[size]}`}
+        aria-hidden
+      />
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+        {message}
+      </p>
+    </motion.div>
+  );
+
+  if (fullScreen) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-black/50 dark:bg-black/70 z-[9999] flex items-center justify-center p-4"
+        aria-busy="true"
+        aria-live="polite"
+        role="status"
+      >
+        {card}
+      </motion.div>
+    );
+  }
 
   return (
-    <div className={containerClasses}>
-      <div className="flex flex-col items-center gap-4">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-          className={sizeClasses[size]}
-        >
-          <Image
-            src={getStorageUrl('coordonnees/September2023/OXC3oL0LreP3RCsgR3k6.webp')}
-            alt="Loading"
-            width={size === 'sm' ? 32 : size === 'md' ? 64 : 96}
-            height={size === 'sm' ? 32 : size === 'md' ? 64 : 96}
-            className={`${sizeClasses[size]} w-auto h-auto object-contain`}
-            style={{ width: 'auto', height: 'auto' }}
-            priority
-          />
-        </motion.div>
-        {message && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">
-            {message}
-          </p>
-        )}
-      </div>
+    <div className="flex items-center justify-center p-8" role="status" aria-busy="true">
+      {card}
     </div>
   );
 }

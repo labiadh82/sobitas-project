@@ -253,16 +253,16 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
               </motion.div>
             </div>
 
-            {/* Right: Countdown Timer - Large & Prominent */}
+            {/* Right: Countdown Timer - Large & Prominent; responsive for very small screens */}
             {!countdown.isExpired && earliestExpiration && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                 whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, type: 'spring' }}
-                className="lg:flex-shrink-0"
+                className="lg:flex-shrink-0 min-w-0 w-full max-w-full overflow-hidden"
               >
-                <div className="relative bg-gradient-to-br from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 rounded-2xl p-6 sm:p-8 shadow-2xl border-2 border-red-400/50 dark:border-red-600/50">
+                <div className="relative bg-gradient-to-br from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 rounded-2xl p-3 max-[320px]:p-2 max-[360px]:p-4 sm:p-6 lg:p-8 shadow-2xl border-2 border-red-400/50 dark:border-red-600/50 overflow-hidden">
                   {/* Pulsing background effect */}
                   <motion.div
                     className="absolute inset-0 rounded-2xl bg-red-500/30 blur-2xl"
@@ -276,71 +276,83 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
                     }}
                   />
                   
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                      <span className="text-white/90 text-sm sm:text-base font-semibold uppercase tracking-wider">
+                  <div className="relative z-10 min-w-0">
+                    <div className="flex items-center gap-1.5 max-[360px]:gap-1 sm:gap-2 mb-2 max-[360px]:mb-2 sm:mb-4">
+                      <Clock className="h-4 w-4 max-[360px]:h-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white flex-shrink-0" />
+                      <span className="text-white/90 text-xs max-[320px]:text-[10px] max-[360px]:text-xs sm:text-base font-semibold uppercase tracking-wider truncate min-w-0">
                         Temps restant
                       </span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-4 gap-1 max-[320px]:gap-0.5 max-[360px]:gap-1.5 sm:gap-2 lg:gap-3 min-w-0">
                       {countdown.days > 0 && (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                           <AnimatePresence mode="wait">
                             <motion.div
                               key={countdown.days}
                               initial={{ scale: 0.5, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
                               exit={{ scale: 0.5, opacity: 0 }}
-                              className="text-2xl sm:text-3xl md:text-4xl font-black text-white tabular-nums"
+                              className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
                             >
                               {String(countdown.days).padStart(2, '0')}
                             </motion.div>
                           </AnimatePresence>
-                          <div className="text-[10px] sm:text-xs text-white/80 mt-1 uppercase">Jours</div>
+                          <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                            <span className="hidden min-[321px]:block truncate" title="Jours">Jours</span>
+                            <span className="min-[321px]:hidden" title="Jours">J</span>
+                          </div>
                         </div>
                       )}
-                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.hours}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-2xl sm:text-3xl md:text-4xl font-black text-white tabular-nums"
+                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.hours).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[10px] sm:text-xs text-white/80 mt-1 uppercase">Heures</div>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block truncate" title="Heures">Heures</span>
+                          <span className="min-[321px]:hidden" title="Heures">H</span>
+                        </div>
                       </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.minutes}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-2xl sm:text-3xl md:text-4xl font-black text-white tabular-nums"
+                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.minutes).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[10px] sm:text-xs text-white/80 mt-1 uppercase">Minutes</div>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block truncate" title="Minutes">Minutes</span>
+                          <span className="min-[321px]:hidden" title="Minutes">Min</span>
+                        </div>
                       </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center border border-white/20">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg max-[320px]:rounded-md p-2 max-[320px]:p-1.5 max-[360px]:p-2.5 sm:p-3 lg:p-4 text-center border border-white/20 min-w-0 overflow-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={countdown.seconds}
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
-                            className="text-2xl sm:text-3xl md:text-4xl font-black text-white tabular-nums"
+                            className="text-base max-[320px]:text-sm max-[360px]:text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tabular-nums leading-none"
                           >
                             {String(countdown.seconds).padStart(2, '0')}
                           </motion.div>
                         </AnimatePresence>
-                        <div className="text-[10px] sm:text-xs text-white/80 mt-1 uppercase">Secondes</div>
+                        <div className="text-[8px] max-[320px]:text-[7px] max-[360px]:text-[9px] sm:text-[10px] lg:text-xs text-white/80 mt-0.5 max-[360px]:mt-1 uppercase">
+                          <span className="hidden min-[321px]:block truncate" title="Secondes">Secondes</span>
+                          <span className="min-[321px]:hidden" title="Secondes">Sec</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -376,7 +388,7 @@ export const VentesFlashSection = memo(function VentesFlashSection({ products }:
         </div>
 
         {/* Products Grid - Enhanced with staggered animations */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-[360px]:gap-1.5 sm:gap-4 md:gap-5 lg:gap-6">
           {products.map((product, index) => (
             <motion.div
               key={product.id}

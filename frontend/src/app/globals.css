@@ -217,15 +217,26 @@ input[type="search"]::-webkit-search-results-decoration {
   }
 }
 
-/* Blog article content: links (and backlinks) look clearly clickable, no underline */
+/* Blog article content: links as orange text only, no box */
 .article-content a {
-  @apply font-medium rounded-md px-2 py-1 -mx-0.5 no-underline
-    text-red-600 bg-red-50/80
-    dark:text-red-400 dark:bg-red-950/30
-    border border-red-200/60 dark:border-red-800/50
+  @apply font-medium no-underline
+    text-orange-600 dark:text-orange-400
+    hover:text-orange-700 dark:hover:text-orange-300 hover:underline
     transition-colors duration-150;
 }
-.article-content a:hover {
-  @apply text-red-700 bg-red-100 border-red-300/80
-    dark:text-red-300 dark:bg-red-950/50 dark:border-red-700/60;
+
+/* Product cards: line-clamp fallback for title ellipsis (webkit required for line-clamp) */
+@layer utilities {
+  .line-clamp-2-fallback {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3-fallback {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }

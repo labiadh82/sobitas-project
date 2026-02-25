@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ProductCard } from '@/app/components/ProductCard';
 import type { Article, Product } from '@/types';
 
-const TITLE = 'Produits recommandés';
+const DEFAULT_TITLE = 'Produits recommandés';
 const SKELETON_CARD_COUNT = 4;
 
 /** Map common keywords in article title/description to category slugs for recommendations */
@@ -31,6 +31,10 @@ interface BlogRecommendedProductsProps {
   categorySlug?: string;
   /** Optional manual override: product slugs set by admin for this post */
   recommendedProductSlugs?: string[];
+  /** Section title (French). Default: "Produits recommandés" */
+  title?: string;
+  /** "inline" = embedded in article (no top border, less margin); "default" = end of article */
+  variant?: 'inline' | 'default';
 }
 
 function SkeletonCard() {
@@ -50,7 +54,10 @@ export function BlogRecommendedProducts({
   article,
   categorySlug = '',
   recommendedProductSlugs = [],
+  title: titleProp,
+  variant = 'default',
 }: BlogRecommendedProductsProps) {
+  const title = titleProp ?? DEFAULT_TITLE;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
@@ -109,17 +116,21 @@ export function BlogRecommendedProducts({
 
   if (!hasFetched && !loading) return null;
 
+  const isInline = variant === 'inline';
+
   return (
     <section
       ref={sectionRef}
       aria-labelledby="blog-recommended-heading"
-      className="mt-10 sm:mt-12 lg:mt-16 pt-8 sm:pt-10 border-t border-gray-200 dark:border-gray-800"
+      className={isInline
+        ? 'my-8 sm:my-10 lg:my-12'
+        : 'mt-10 sm:mt-12 lg:mt-16 pt-8 sm:pt-10 border-t border-gray-200 dark:border-gray-800'}
     >
       <h2
         id="blog-recommended-heading"
         className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8"
       >
-        {TITLE}
+        {title}
       </h2>
 
       {loading ? (

@@ -60,7 +60,7 @@ export const ProductSection = memo(function ProductSection({
         </div>
 
         {/* Products Grid - Optimized for mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 max-[360px]:gap-1.5 sm:gap-4 md:gap-6">
           {products.map((product) => (
             <ProductCard
               key={product.id}

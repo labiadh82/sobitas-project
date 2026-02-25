@@ -201,6 +201,26 @@ export function SearchBar({ variant = 'desktop', className }: SearchBarProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Mobile: track visualViewport height so when the keyboard opens, the sheet shrinks and results stay visible/scrollable above the keyboard
+  const [mobileSheetHeight, setMobileSheetHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (variant !== 'mobile' || !mounted || !isOpen) {
+      setMobileSheetHeight(null);
+      return;
+    }
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const updateHeight = () => setMobileSheetHeight(viewport.height);
+    updateHeight();
+    viewport.addEventListener('resize', updateHeight);
+    viewport.addEventListener('scroll', updateHeight);
+    return () => {
+      viewport.removeEventListener('resize', updateHeight);
+      viewport.removeEventListener('scroll', updateHeight);
+      setMobileSheetHeight(null);
+    };
+  }, [variant, mounted, isOpen]);
+
   const mobileSearchButton = (
     <Button
       variant="ghost"
@@ -237,12 +257,13 @@ export function SearchBar({ variant = 'desktop', className }: SearchBarProps) {
         <SheetContent
           side="top"
           className="h-[100dvh] overflow-hidden flex flex-col rounded-none sm:rounded-b-2xl bg-white dark:bg-gray-950 border-none p-0 [&>button]:hidden"
+          style={mobileSheetHeight != null ? { height: `${mobileSheetHeight}px`, maxHeight: `${mobileSheetHeight}px` } : undefined}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Recherche produits</SheetTitle>
           </SheetHeader>
 
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col h-full min-h-0 overflow-hidden">
             {/* Header / Search Input Area */}
             <div className="px-4 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 shrink-0 bg-white dark:bg-gray-950">
               <Button
@@ -288,8 +309,11 @@ export function SearchBar({ variant = 'desktop', className }: SearchBarProps) {
               </form>
             </div>
 
-            {/* Results Area */}
-            <div className="flex-1 overflow-y-auto p-4 min-h-0 bg-gray-50/50 dark:bg-gray-950">
+            {/* Results Area – scrollable above keyboard; min-h-0 so flex shrinks when viewport shrinks */}
+            <div
+              className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0 bg-gray-50/50 dark:bg-gray-950 overscroll-contain"
+              style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+            >
               <SearchResults
                 query={debouncedQuery}
                 products={products}

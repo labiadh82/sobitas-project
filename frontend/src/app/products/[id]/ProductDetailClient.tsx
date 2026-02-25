@@ -424,7 +424,7 @@ export function ProductDetailClient({ product: initialProduct, similarProducts, 
       <Header />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-6 lg:py-12 pb-44 lg:pb-12">
-        {/* Breadcrumb: Accueil > Category > Subcategory > Product */}
+        {/* Breadcrumb: Accueil > Boutique > Category > Subcategory (ends at category, no product name) */}
         {breadcrumbItems.length > 0 && (
           <nav aria-label="Fil d'Ariane" className="mb-3 sm:mb-4 text-sm text-gray-500 dark:text-gray-400">
             <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
@@ -954,15 +954,16 @@ export function ProductDetailClient({ product: initialProduct, similarProducts, 
 
               return (
                 <Tabs defaultValue="description" className="w-full flex flex-col gap-4 sm:gap-5">
-                  <TabsList className="flex w-full shrink-0 bg-gray-100 dark:bg-gray-900 rounded-lg sm:rounded-xl p-2 sm:p-1.5 gap-2 sm:gap-1.5 min-h-[44px]">
-                    <TabsTrigger value="description" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-1 min-w-0 px-2 sm:px-2 truncate" title={product.zone1 || 'Description'}>
+                  {/* On mobile: horizontal scroll so "Valeurs nutritionnelles" etc. show in full; on sm+: equal-width tabs */}
+                  <TabsList className="flex w-full shrink-0 bg-gray-100 dark:bg-gray-900 rounded-lg sm:rounded-xl p-2 sm:p-1.5 gap-2 sm:gap-1.5 min-h-[44px] overflow-x-auto overflow-y-hidden flex-nowrap scrollbar-hide sm:overflow-visible">
+                    <TabsTrigger value="description" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone1 || 'Description'}>
                       {product.zone1 || 'Description'}
                     </TabsTrigger>
-                    <TabsTrigger value="nutrition" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-1 min-w-0 px-2 sm:px-2 truncate" title={product.zone3 || 'Valeurs nutritionnelles'}>
+                    <TabsTrigger value="nutrition" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone3 || 'Valeurs nutritionnelles'}>
                       {product.zone3 || 'Valeurs nutritionnelles'}
                     </TabsTrigger>
                     {hasQuestions && (
-                      <TabsTrigger value="questions" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-1 min-w-0 px-2 sm:px-2 truncate" title={product.zone4 || 'Questions'}>
+                      <TabsTrigger value="questions" className="rounded-md sm:rounded-lg text-xs sm:text-sm py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex-shrink-0 sm:flex-1 min-w-0 px-3 sm:px-2 whitespace-nowrap sm:truncate" title={product.zone4 || 'Questions'}>
                         {product.zone4 || 'Questions'}
                       </TabsTrigger>
                     )}

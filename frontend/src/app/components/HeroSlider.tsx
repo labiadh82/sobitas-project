@@ -218,8 +218,8 @@ export const HeroSlider = memo(function HeroSlider({ slides }: HeroSliderProps) 
         {/* Gradient Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" aria-hidden="true" />
 
-        {/* Content - Responsive and centered */}
-        <div className="relative h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+        {/* Content - Responsive and centered; extra padding on mobile so arrows don't cover text */}
+        <div className="relative h-full w-full max-w-7xl mx-auto pl-14 pr-14 sm:pl-6 sm:pr-6 lg:px-8 flex items-center">
           <div className="max-w-2xl lg:max-w-3xl">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-6 leading-tight drop-shadow-lg">
               {currentSlideData.titre}
