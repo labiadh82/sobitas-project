@@ -96,7 +96,7 @@ class StockService
             COUNT(*) as total,
             SUM(CASE WHEN qte > 0 AND (rupture = 1 OR rupture IS NULL) THEN 1 ELSE 0 END) as in_stock,
             SUM(CASE WHEN qte <= 0 OR rupture = 0 THEN 1 ELSE 0 END) as out_of_stock,
-            SUM(CASE WHEN qte > 0 AND qte < COALESCE(low_stock_threshold, 10) THEN 1 ELSE 0 END) as low_stock,
+            SUM(CASE WHEN qte > 0 AND qte < 10 THEN 1 ELSE 0 END) as low_stock,
             SUM(CASE WHEN (qte > 0 AND rupture = 0) OR (qte <= 0 AND rupture = 1) THEN 1 ELSE 0 END) as inconsistent
         ")->first();
 

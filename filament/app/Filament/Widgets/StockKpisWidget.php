@@ -12,8 +12,6 @@ class StockKpisWidget extends BaseWidget
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?string $pollingInterval = null;
-
     public function getStats(): array
     {
         $service = app(StockService::class);

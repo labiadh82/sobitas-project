@@ -41,7 +41,7 @@ class StockAlertsPage extends Page implements HasTable
                     ->where(function (Builder $q) {
                         $q->where('qte', '<=', 0)
                             ->orWhere('rupture', 0)
-                            ->orWhereRaw('qte < COALESCE(low_stock_threshold, 10)')
+                            ->orWhereRaw('(qte > 0 AND qte < 10)')
                             ->orWhereRaw('(qte > 0 AND rupture = 0) OR (qte <= 0 AND (rupture = 1 OR rupture IS NULL))');
                     })
                     ->orderByRaw('CASE WHEN qte <= 0 THEN 0 WHEN rupture = 0 AND qte > 0 THEN 1 ELSE 2 END, qte ASC')
@@ -91,7 +91,7 @@ class StockAlertsPage extends Page implements HasTable
         if ($rupture === false && $qte > 0) {
             return 'Incohérence';
         }
-        $threshold = (int) ($record->low_stock_threshold ?? 10);
+        $threshold = (int) $record->stock_threshold;
         if ($qte < $threshold) {
             return 'Stock faible';
         }

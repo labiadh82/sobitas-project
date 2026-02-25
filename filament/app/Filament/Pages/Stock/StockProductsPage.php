@@ -78,9 +78,8 @@ class StockProductsPage extends Page implements HasTable
                     ->badge()
                     ->formatStateUsing(fn ($record) => $this->stockStatusLabel($record))
                     ->color(fn ($record) => $this->stockStatusColor($record)),
-                Tables\Columns\TextColumn::make('low_stock_threshold')
+                Tables\Columns\TextColumn::make('stock_threshold')
                     ->label('Seuil alerte')
-                    ->sortable()
                     ->toggleable()
                     ->placeholder('10'),
                 Tables\Columns\TextColumn::make('velocity_30d')
@@ -126,7 +125,7 @@ class StockProductsPage extends Page implements HasTable
                             });
                         }
                         if ($v === 'low_stock') {
-                            return $query->where('qte', '>', 0)->whereRaw('qte < COALESCE(low_stock_threshold, 10)');
+                            return $query->where('qte', '>', 0)->where('qte', '<', 10);
                         }
                         if ($v === 'inconsistent') {
                             return $query->whereRaw('(qte > 0 AND rupture = 0) OR (qte <= 0 AND (rupture = 1 OR rupture IS NULL))');
@@ -140,12 +139,6 @@ class StockProductsPage extends Page implements HasTable
                     ->relationship('brand', 'designation_fr')
                     ->searchable()
                     ->preload(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('export')
-                    ->label('Exporter CSV')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => null), // Placeholder: implement export
             ]);
     }
 

@@ -7,10 +7,10 @@ use App\Services\StockService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Schemas\Components\Section as SchemaSection;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section as SchemaSection;
+use Filament\Schemas\Schema;
 
 class StockAdjustmentsPage extends Page implements HasForms
 {
@@ -53,9 +53,10 @@ class StockAdjustmentsPage extends Page implements HasForms
         }
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
+            ->statePath('data')
             ->schema([
                 SchemaSection::make('Produit')
                     ->schema([
@@ -119,8 +120,7 @@ class StockAdjustmentsPage extends Page implements HasForms
                             ->maxLength(500),
                     ])
                     ->columns(2),
-            ])
-            ->statePath('data');
+            ]);
     }
 
     public function adjust(): void

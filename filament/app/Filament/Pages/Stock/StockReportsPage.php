@@ -39,7 +39,7 @@ class StockReportsPage extends Page
             ->get();
 
         $outOfStock = Product::where('qte', '<=', 0)->orWhere('rupture', 0)->count();
-        $lowStock = Product::where('qte', '>', 0)->whereRaw('qte < COALESCE(low_stock_threshold, 10)')->count();
+        $lowStock = Product::where('qte', '>', 0)->where('qte', '<', 10)->count();
 
         return [
             'value_by_category' => $valueByCategory,
