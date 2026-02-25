@@ -37,6 +37,7 @@ use App\Filament\Resources\SeoPageResource;
 use App\Filament\Resources\ServiceResource;
 use App\Filament\Resources\SlideResource;
 use App\Filament\Resources\SousCategoryResource;
+use App\Filament\Resources\TagResource;
 use App\Filament\Resources\TicketResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\LatestCommandes;
@@ -56,6 +57,8 @@ use App\Filament\Widgets\DelayedOrdersTable;
 use App\Filament\Widgets\LowStockTable;
 use App\Filament\Widgets\TopCustomersTable;
 use App\Filament\Widgets\ReturnsRefundsTable;
+use App\Filament\Widgets\StockKpisWidget;
+use App\Filament\Widgets\StockMovementChartWidget;
 use App\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -160,6 +163,8 @@ class AdminPanelProvider extends PanelProvider
                 TopProductsWidget::class,
                 MonthlyRevenueComparison::class,
                 LatestCommandes::class,
+                StockKpisWidget::class,
+                StockMovementChartWidget::class,
             ])
             ->unsavedChangesAlerts()
             ->brandLogo(fn () => view('filament.app.logo'))
