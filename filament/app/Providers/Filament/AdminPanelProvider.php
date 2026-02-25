@@ -25,6 +25,7 @@ use App\Filament\Resources\FactureTvaResource;
 use App\Filament\Resources\FaqResource;
 use App\Filament\Resources\MessageResource;
 use App\Filament\Resources\NewsletterResource;
+use App\Filament\Resources\PageResource;
 use App\Filament\Resources\ProductPriceListResource;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\QuotationResource;
@@ -110,6 +111,7 @@ class AdminPanelProvider extends PanelProvider
                 FaqResource::class,
                 MessageResource::class,
                 NewsletterResource::class,
+                PageResource::class,
                 ProductPriceListResource::class,
                 ProductResource::class,
                 QuotationResource::class,
