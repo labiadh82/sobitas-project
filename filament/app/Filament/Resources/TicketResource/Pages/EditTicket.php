@@ -36,8 +36,7 @@ class EditTicket extends EditRecord
                     'printUrl' => route('tickets.print', ['ticket' => $this->record->id]),
                     'title' => 'Ticket ' . $this->record->numero,
                 ]))
-                ->modalSubmitAction(false)
-                ->closeParentActions(),
+                ->modalSubmitAction(false),
             Actions\DeleteAction::make(),
         ];
     }

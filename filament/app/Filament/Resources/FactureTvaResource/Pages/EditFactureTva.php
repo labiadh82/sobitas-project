@@ -37,8 +37,7 @@ class EditFactureTva extends EditRecord
                     'title' => 'Facture ' . $this->record->numero,
                     'showStyleSwitcher' => true,
                 ]))
-                ->modalSubmitAction(false)
-                ->closeParentActions(),
+                ->modalSubmitAction(false),
             Actions\DeleteAction::make(),
         ];
     }

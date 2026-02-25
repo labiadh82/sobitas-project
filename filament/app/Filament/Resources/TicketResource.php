@@ -96,8 +96,7 @@ class TicketResource extends Resource
                         'printUrl' => route('tickets.print', ['ticket' => $record->id]),
                         'title' => 'Ticket ' . $record->numero,
                     ]))
-                    ->modalSubmitAction(false)
-                    ->closeParentActions(),
+                    ->modalSubmitAction(false),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([

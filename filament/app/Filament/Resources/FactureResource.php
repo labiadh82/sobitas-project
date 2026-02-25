@@ -116,8 +116,7 @@ class FactureResource extends Resource
                         'printUrl' => route('factures.print', ['facture' => $record->id]),
                         'title' => 'Bon de livraison ' . $record->numero,
                     ]))
-                    ->modalSubmitAction(false)
-                    ->closeParentActions(),
+                    ->modalSubmitAction(false),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([

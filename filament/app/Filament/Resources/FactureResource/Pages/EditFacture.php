@@ -36,8 +36,7 @@ class EditFacture extends EditRecord
                     'printUrl' => route('factures.print', ['facture' => $this->record->id]),
                     'title' => 'Bon de livraison ' . $this->record->numero,
                 ]))
-                ->modalSubmitAction(false)
-                ->closeParentActions(),
+                ->modalSubmitAction(false),
             Actions\DeleteAction::make(),
         ];
     }

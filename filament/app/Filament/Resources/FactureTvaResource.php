@@ -67,8 +67,7 @@ class FactureTvaResource extends Resource
                         'title' => 'Facture ' . $record->numero,
                         'showStyleSwitcher' => true,
                     ]))
-                    ->modalSubmitAction(false)
-                    ->closeParentActions(),
+                    ->modalSubmitAction(false),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([Actions\DeleteBulkAction::make()]);

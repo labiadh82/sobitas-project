@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\LowStockProducts;
 use App\Filament\Pages\SendSms;
 use App\Filament\Resources\AnnonceResource;
 use App\Filament\Resources\ArticleResource;
@@ -117,6 +118,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->pages([
                 Dashboard::class,
+                LowStockProducts::class,
                 SendSms::class,
             ])
             ->widgets([

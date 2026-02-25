@@ -158,8 +158,7 @@ class QuotationResource extends Resource
                         'printUrl' => route('quotations.print', ['quotation' => $record->id]),
                         'title' => 'Devis ' . $record->numero,
                     ]))
-                    ->modalSubmitAction(false)
-                    ->closeParentActions(),
+                    ->modalSubmitAction(false),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([

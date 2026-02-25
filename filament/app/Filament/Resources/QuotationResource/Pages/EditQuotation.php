@@ -37,8 +37,7 @@ class EditQuotation extends EditRecord
                     'printUrl' => route('quotations.print', ['quotation' => $this->record->id]),
                     'title' => 'Devis ' . $this->record->numero,
                 ]))
-                ->modalSubmitAction(false)
-                ->closeParentActions(),
+                ->modalSubmitAction(false),
             Actions\DeleteAction::make(),
         ];
     }
