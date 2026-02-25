@@ -5,8 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MessageResource\Pages;
 use App\Models\Message;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -31,7 +32,7 @@ class MessageResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Templates de messages SMS')
+                Section::make('Templates de messages SMS')
                     ->description('Variables: [nom], [prenom], [num_commande], [etat]')
                     ->schema([
                         Forms\Components\Textarea::make('msg_etat_commande')

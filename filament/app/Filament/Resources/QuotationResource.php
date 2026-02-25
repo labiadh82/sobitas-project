@@ -8,6 +8,7 @@ use App\Models\Quotation;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -33,7 +34,7 @@ class QuotationResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Informations du devis')
+                Section::make('Informations du devis')
                     ->schema([
                         Forms\Components\Select::make('client_id')
                             ->label('Client')

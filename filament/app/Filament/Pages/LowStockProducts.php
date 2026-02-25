@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\ProductResource;
 use App\Models\Product;
+use Filament\Actions;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -84,7 +85,7 @@ class LowStockProducts extends Page implements HasTable
             ->defaultPaginationPageOption(25)
             ->recordUrl(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))
             ->actions([
-                Tables\Actions\EditAction::make()
+                Actions\EditAction::make()
                     ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record])),
             ]);
     }

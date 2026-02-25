@@ -7,6 +7,7 @@ use App\Models\Facture;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -33,7 +34,7 @@ class FactureResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Forms\Components\Section::make('Informations du bon de livraison')
+            Section::make('Informations du bon de livraison')
                 ->schema([
                     Forms\Components\Select::make('client_id')
                         ->label('Client')

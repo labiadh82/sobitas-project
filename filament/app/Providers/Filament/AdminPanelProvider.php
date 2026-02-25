@@ -6,6 +6,12 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\LowStockProducts;
 use App\Filament\Pages\SendSms;
+use App\Filament\Pages\Stock\StockDashboard;
+use App\Filament\Pages\Stock\StockProductsPage;
+use App\Filament\Pages\Stock\StockMovementsPage;
+use App\Filament\Pages\Stock\StockAlertsPage;
+use App\Filament\Pages\Stock\StockAdjustmentsPage;
+use App\Filament\Pages\Stock\StockReportsPage;
 use App\Filament\Resources\AnnonceResource;
 use App\Filament\Resources\ArticleResource;
 use App\Filament\Resources\BrandResource;
@@ -120,6 +126,13 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
                 LowStockProducts::class,
                 SendSms::class,
+                // Gestion de stock
+                StockDashboard::class,
+                StockProductsPage::class,
+                StockMovementsPage::class,
+                StockAlertsPage::class,
+                StockAdjustmentsPage::class,
+                StockReportsPage::class,
             ])
             ->widgets([
                 AccountWidget::class,
@@ -154,6 +167,8 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-document-text'),
                 NavigationGroup::make('Clients')
                     ->icon('heroicon-o-users'),
+                NavigationGroup::make('Gestion de stock')
+                    ->icon('heroicon-o-archive-box'),
                 NavigationGroup::make('Catalogue')
                     ->icon('heroicon-o-cube'),
                 NavigationGroup::make('Blog')

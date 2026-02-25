@@ -14,7 +14,7 @@ class Product extends Model
     protected $fillable = [
         'designation_fr', 'slug', 'description_fr', 'cover', 'alt_cover', 'description_cover',
         'images', 'prix', 'prix_ht', 'promo', 'promo_ht', 'promo_expiration_date',
-        'qte', 'publier', 'rupture', 'new_product', 'best_seller', 'pack', 'note',
+        'qte', 'low_stock_threshold', 'publier', 'rupture', 'new_product', 'best_seller', 'pack', 'note',
         'meta_title', 'meta_description', 'sous_categorie_id', 'brand_id',
     ];
 
@@ -25,6 +25,7 @@ class Product extends Model
         'promo' => 'float',
         'promo_ht' => 'float',
         'qte' => 'integer',
+        'low_stock_threshold' => 'integer',
         'publier' => 'boolean',
         'rupture' => 'boolean',
         'new_product' => 'boolean',
@@ -84,6 +85,46 @@ class Product extends Model
     public function detailsTickets(): HasMany
     {
         return $this->hasMany(DetailsTicket::class, 'produit_id');
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    // ── Stock helpers (storefront + admin) ──────────────
+
+    public function getStockThresholdAttribute(): int
+    {
+        return (int) ($this->attributes['low_stock_threshold'] ?? 10);
+    }
+
+    /** in_stock | low_stock | out_of_stock | inconsistent */
+    public function getStockStatusAttribute(): string
+    {
+        $qte = (int) $this->qte;
+        $rupture = (bool) $this->rupture;
+        $threshold = $this->stock_threshold;
+
+        if ($rupture && $qte > 0) {
+            return 'inconsistent';
+        }
+        if ($qte <= 0) {
+            return 'out_of_stock';
+        }
+        if ($qte < $threshold) {
+            return 'low_stock';
+        }
+        return 'in_stock';
+    }
+
+    /** Safe for storefront: false if rupture OR qte <= 0 */
+    public function getIsAvailableAttribute(): bool
+    {
+        if ((bool) $this->rupture) {
+            return false;
+        }
+        return (int) $this->qte > 0;
     }
 
     // ── Scopes ──────────────────────────────────────────

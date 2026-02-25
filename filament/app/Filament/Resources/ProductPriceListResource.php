@@ -6,8 +6,9 @@ use App\Filament\Resources\ProductPriceListResource\Pages;
 use App\Filament\Resources\ProductPriceListResource\RelationManagers;
 use App\Models\ProductPriceList;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -32,7 +33,7 @@ class ProductPriceListResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Liste de prix')
+                Section::make('Liste de prix')
                     ->schema([
                         Forms\Components\TextInput::make('designation')
                             ->label('Désignation')

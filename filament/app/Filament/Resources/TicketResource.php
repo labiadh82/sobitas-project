@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,7 +31,7 @@ class TicketResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Forms\Components\Section::make('Informations du ticket')
+            Section::make('Informations du ticket')
                 ->schema([
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
