@@ -18,7 +18,7 @@ class StockDashboard extends Page
 
     protected string $view = 'filament.pages.stock.stock-dashboard';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock';
     }

@@ -30,7 +30,7 @@ class StockAdjustmentsPage extends Page implements HasForms
 
     public ?array $data = [];
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock/adjustments';
     }

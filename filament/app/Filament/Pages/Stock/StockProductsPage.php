@@ -30,7 +30,7 @@ class StockProductsPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.stock.stock-products-page';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock/products';
     }

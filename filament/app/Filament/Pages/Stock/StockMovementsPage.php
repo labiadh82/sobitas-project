@@ -26,7 +26,7 @@ class StockMovementsPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.stock.stock-movements-page';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock/movements';
     }

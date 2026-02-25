@@ -21,7 +21,7 @@ class StockReportsPage extends Page
 
     protected string $view = 'filament.pages.stock.stock-reports-page';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock/reports';
     }

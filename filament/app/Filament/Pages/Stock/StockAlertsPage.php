@@ -27,7 +27,7 @@ class StockAlertsPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.stock.stock-alerts-page';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return 'stock/alerts';
     }
