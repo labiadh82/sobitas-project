@@ -62,14 +62,14 @@ class CommandeController extends Controller
 
             if (! empty($commandeData['user_id'])) {
                 $new_facture->user_id = $commandeData['user_id'];
-                if (\Illuminate\Support\Facades\Schema::hasColumn($new_facture->getTable(), 'client_id')) {
+                if (Schema::hasColumn($new_facture->getTable(), 'client_id')) {
                     $new_facture->client_id = $commandeData['user_id'];
                 }
             } else {
                 $client = app(ClientService::class)->findOrCreateClientFromDeliveryInfo($commandeData);
                 if ($client) {
                     $new_facture->user_id = $client->id;
-                    if (\Illuminate\Support\Facades\Schema::hasColumn($new_facture->getTable(), 'client_id')) {
+                    if (Schema::hasColumn($new_facture->getTable(), 'client_id')) {
                         $new_facture->client_id = $client->id;
                     }
                 }
