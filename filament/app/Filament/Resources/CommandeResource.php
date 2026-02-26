@@ -121,10 +121,9 @@ class CommandeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            // Select only displayed / frequently used columns to keep the query light
-            ->modifyQueryUsing(fn (Builder $query) => $query
-                ->with('client:id,name,phone_1')
-                ->select([
+            // Select only displayed / frequently used columns; client_id only if column exists (migration may not have run yet)
+            ->modifyQueryUsing(function (Builder $query) {
+                $columns = [
                     'id',
                     'numero',
                     'nom',
@@ -138,9 +137,12 @@ class CommandeResource extends Resource
                     'region',
                     'created_at',
                     'user_id',
-                    'client_id',
-                ])
-            )
+                ];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('commandes', 'client_id')) {
+                    $columns[] = 'client_id';
+                }
+                return $query->with('client:id,name,phone_1')->select($columns);
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('numero')
                     ->label('N°')

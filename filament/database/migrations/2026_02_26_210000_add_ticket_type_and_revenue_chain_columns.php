@@ -19,8 +19,8 @@ return new class extends Migration
                     $table->foreign('commande_id')->references('id')->on('commandes')->nullOnDelete();
                     $table->index('commande_id');
                 }
-                if (Schema::hasColumn('tickets', 'type')) {
-                    $table->index(['type', 'created_at']);
+                if (Schema::hasColumn('tickets', 'type') && ! Schema::hasIndex('tickets', 'tickets_type_created_at_index')) {
+                    $table->index(['type', 'created_at'], 'tickets_type_created_at_index');
                 }
             });
         }
@@ -44,10 +44,14 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasTable('tickets') && Schema::hasColumn('tickets', 'type')) {
+        if (Schema::hasTable('tickets')) {
             Schema::table('tickets', function (Blueprint $table) {
-                $table->dropIndex(['type', 'created_at']);
-                $table->dropColumn('type');
+                if (Schema::hasIndex('tickets', 'tickets_type_created_at_index')) {
+                    $table->dropIndex('tickets_type_created_at_index');
+                }
+                if (Schema::hasColumn('tickets', 'type')) {
+                    $table->dropColumn('type');
+                }
             });
         }
         if (Schema::hasTable('tickets') && Schema::hasColumn('tickets', 'commande_id')) {
