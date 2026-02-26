@@ -47,9 +47,22 @@ class SousCategoryResource extends Resource
                 ->required()
                 ->maxLength(255)
                 ->unique(ignoreRecord: true),
+            Forms\Components\Textarea::make('description_fr')
+                ->label('Description')
+                ->maxLength(65535)
+                ->columnSpanFull(),
             Forms\Components\TextInput::make('cover')
                 ->label('Image')
                 ->maxLength(500),
+            Forms\Components\TextInput::make('alt_cover')
+                ->label('Alt Cover')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('review_seo')
+                ->label('Review (seo)')
+                ->maxLength(255),
+            Forms\Components\TextInput::make('aggregate_rating_seo')
+                ->label('AggregateRating (seo)')
+                ->maxLength(255),
         ]);
     }
 
@@ -59,7 +72,7 @@ class SousCategoryResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('categorie:id,designation_fr'))
             ->columns([
                 Tables\Columns\TextColumn::make('categorie.designation_fr')
-                    ->label('Catégorie')
+                    ->label('Catégories')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('designation_fr')
@@ -67,12 +80,30 @@ class SousCategoryResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('products_count')
-                    ->counts('products')
-                    ->label('Produits'),
+                    ->label('Slug')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('description_fr')
+                    ->label('Description')
+                    ->limit(40)
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('alt_cover')
+                    ->label('Alt Cover')
+                    ->limit(30)
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('review_seo')
+                    ->label('Review (seo)')
+                    ->limit(30)
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('aggregate_rating_seo')
+                    ->label('AggregateRating (seo)')
+                    ->limit(30)
+                    ->toggleable(),
             ])
             ->actions([
+                Actions\ViewAction::make()->slideOver(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])

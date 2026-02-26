@@ -36,6 +36,7 @@ class TicketResource extends Resource
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
                         ->relationship('client', 'name')
+                        ->getOptionLabelFromRecordUsing(fn ($record) => (string) ($record->name ?? 'Client #' . $record->id))
                         ->searchable()
                         ->preload()
                         ->required(),
