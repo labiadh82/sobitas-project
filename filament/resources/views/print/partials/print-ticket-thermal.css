@@ -1,7 +1,4 @@
-{{--
-  Thermal receipt print styles — 80mm ticket printer.
-  Use with print/ticket.blade.php. No A4, no cards, no colored boxes.
---}}
+/* Thermal receipt — 80mm ticket printer. Use with print/ticket.blade.php. */
 @page {
     size: 80mm auto;
     margin: 0;
