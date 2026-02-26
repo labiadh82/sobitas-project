@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Ticket;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class RevenueChart extends ChartWidget
 {
-    protected ?string $heading = 'Chiffre d\'affaires (30 derniers jours)';
+    protected ?string $heading = 'Chiffre d\'affaires HT (30 derniers jours)';
 
     protected static bool $isLazy = true;
 
@@ -19,15 +20,14 @@ class RevenueChart extends ChartWidget
 
     protected ?string $maxHeight = '300px';
 
-    protected ?string $pollingInterval = null; // Disable polling — data cached 2min, no need for auto-refresh
+    protected ?string $pollingInterval = null;
 
     /**
-     * BEFORE: 120 separate queries (30 days × 4 tables).
-     * AFTER: 4 queries total, one per revenue source, grouped by date.
+     * CA Policy 1: Ticket caisse + Commande expidee + Facture TVA standalone only.
      */
     protected function getData(): array
     {
-        return Cache::remember('dashboard:revenue_chart', 120, function () {
+        return Cache::remember('dashboard:revenue_chart_v2', 120, function () {
             return $this->buildChartData();
         });
     }
@@ -35,49 +35,45 @@ class RevenueChart extends ChartWidget
     private function buildChartData(): array
     {
         $startDate = Carbon::now()->subDays(29)->startOfDay();
+        $endDate = Carbon::now()->endOfDay();
 
-        // One query per source, grouped by day — 4 queries total instead of 120
-        $facturesData = $this->getDailyTotals('factures', $startDate);
-        $factureTvasData = $this->getDailyTotals('facture_tvas', $startDate);
-        $ticketsData = $this->getDailyTotals('tickets', $startDate);
+        $ticketsData = $this->getDailyTotals('tickets', $startDate, "type = '" . Ticket::TYPE_TICKET_CAISSE . "'");
         $commandesData = $this->getDailyTotals('commandes', $startDate, "etat = 'expidee'");
+        $invoicesData = DB::table('facture_tvas')
+            ->whereNull('source_ticket_id')
+            ->whereNull('commande_id')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as day'), DB::raw('ROUND(SUM(prix_ht), 2) as total'))
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->pluck('total', 'day')
+            ->toArray();
 
-        // Build labels and data arrays
         $labels = [];
         for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $key = $date->format('Y-m-d');
-            $labels[] = $date->format('d M');
+            $labels[] = Carbon::now()->subDays($i)->format('d M');
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Bons de Livraison',
-                    'data' => $this->mapToOrderedArray($facturesData),
-                    'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
-                    'fill' => true,
-                ],
-                [
-                    'label' => 'Factures TVA',
-                    'data' => $this->mapToOrderedArray($factureTvasData),
-                    'borderColor' => '#10b981',
-                    'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
-                    'fill' => true,
-                ],
-                [
-                    'label' => 'Tickets',
+                    'label' => 'Boutique (tickets caisse)',
                     'data' => $this->mapToOrderedArray($ticketsData),
                     'borderColor' => '#f59e0b',
                     'backgroundColor' => 'rgba(245, 158, 11, 0.1)',
                     'fill' => true,
                 ],
                 [
-                    'label' => 'Commandes',
+                    'label' => 'Commandes expédiées',
                     'data' => $this->mapToOrderedArray($commandesData),
                     'borderColor' => '#ef4444',
                     'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
+                    'fill' => true,
+                ],
+                [
+                    'label' => 'Factures TVA (standalone)',
+                    'data' => $this->mapToOrderedArray($invoicesData),
+                    'borderColor' => '#10b981',
+                    'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
                     'fill' => true,
                 ],
             ],
@@ -85,14 +81,11 @@ class RevenueChart extends ChartWidget
         ];
     }
 
-    /**
-     * Single query with GROUP BY date instead of 30 individual queries.
-     */
     private function getDailyTotals(string $table, Carbon $startDate, ?string $extraWhere = null): array
     {
         try {
             $query = DB::table($table)
-                ->select(DB::raw('DATE(created_at) as day'), DB::raw('ROUND(SUM(prix_ttc), 2) as total'))
+                ->select(DB::raw('DATE(created_at) as day'), DB::raw('ROUND(SUM(prix_ht), 2) as total'))
                 ->where('created_at', '>=', $startDate)
                 ->groupBy(DB::raw('DATE(created_at)'));
 
@@ -106,9 +99,6 @@ class RevenueChart extends ChartWidget
         }
     }
 
-    /**
-     * Maps date-keyed totals to an ordered array for last 30 days.
-     */
     private function mapToOrderedArray(array $dailyTotals): array
     {
         $result = [];

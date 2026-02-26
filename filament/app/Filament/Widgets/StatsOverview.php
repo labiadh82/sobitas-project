@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Client;
 use App\Models\Commande;
 use App\Models\Product;
+use App\Services\RevenueService;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -79,61 +80,23 @@ class StatsOverview extends BaseWidget
                 break;
         }
 
-        // ── Single query for all revenue data (period, previous period, today) ──
-        // Uses conditional aggregation instead of 6+ separate queries
-        $revenue = DB::selectOne("
-            SELECT
-                COALESCE(SUM(CASE WHEN created_at >= ? THEN prix_ttc ELSE 0 END), 0) as period_revenue,
-                COALESCE(SUM(CASE WHEN created_at >= ? AND created_at <= ? THEN prix_ttc ELSE 0 END), 0) as last_period_revenue,
-                COALESCE(SUM(CASE WHEN DATE(created_at) = CURDATE() THEN prix_ttc ELSE 0 END), 0) as today_revenue
-            FROM (
-                SELECT prix_ttc, created_at FROM factures WHERE created_at >= ?
-                UNION ALL
-                SELECT prix_ttc, created_at FROM facture_tvas WHERE created_at >= ?
-                UNION ALL
-                SELECT prix_ttc, created_at FROM tickets WHERE created_at >= ?
-            ) AS combined_revenue
-        ", [
-            $start, $lastStart, $lastEnd,
-            $lastStart, $lastStart, $lastStart,
-        ]);
+        // ── Revenue (CA) — Policy 1: no double counting ──
+        // Boutique: tickets (type=ticket_caisse). Delivery: commandes (etat=expidee). Standalone facture_tvas only.
+        $revenueService = app(RevenueService::class);
 
-        $periodRevenue = (float) $revenue->period_revenue;
-        $lastPeriodRevenue = (float) $revenue->last_period_revenue;
-        $todayRevenue = (float) $revenue->today_revenue;
+        $periodRevenue = $revenueService->revenueHt($start, $end);
+        $lastPeriodRevenue = $revenueService->revenueHt($lastStart, $lastEnd);
+        $todayRevenue = $revenueService->revenueHtToday();
 
         $revenueGrowth = $lastPeriodRevenue > 0
             ? round((($periodRevenue - $lastPeriodRevenue) / $lastPeriodRevenue) * 100, 1)
             : 0;
 
-        // ── Sparkline based on the selected period (max 30 days for visual clarity) ──
+        // ── Sparkline: daily CA HT (same policy) ──
         $sparklineDays = $preset === '90_days' ? 30 : ($preset === 'last_month' ? 30 : 7);
-        $dailyData = DB::select("
-            SELECT
-                DATE(created_at) as day,
-                SUM(prix_ttc) as daily_total
-            FROM (
-                SELECT prix_ttc, created_at FROM factures WHERE created_at >= ?
-                UNION ALL
-                SELECT prix_ttc, created_at FROM facture_tvas WHERE created_at >= ?
-                UNION ALL
-                SELECT prix_ttc, created_at FROM tickets WHERE created_at >= ?
-            ) AS combined
-            GROUP BY DATE(created_at)
-            ORDER BY day
-        ", [
-            $now->copy()->subDays($sparklineDays - 1)->startOfDay(),
-            $now->copy()->subDays($sparklineDays - 1)->startOfDay(),
-            $now->copy()->subDays($sparklineDays - 1)->startOfDay(),
-        ]);
-
-        // Build sparkline array, filling gaps with 0
-        $dailyMap = collect($dailyData)->keyBy('day');
-        $dailyChart = [];
-        for ($i = $sparklineDays - 1; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i)->format('Y-m-d');
-            $dailyChart[] = (float) ($dailyMap[$date]->daily_total ?? 0);
-        }
+        $sparkStart = $now->copy()->subDays($sparklineDays - 1)->startOfDay();
+        $dailyHt = $revenueService->dailyRevenueHt($sparkStart, $sparklineDays);
+        $dailyChart = array_values($dailyHt);
 
         // ── Single query for order counts ──
         $orderStats = DB::selectOne("
@@ -158,15 +121,17 @@ class StatsOverview extends BaseWidget
             FROM clients
         ", [$start]);
 
+        $periodTtc = $revenueService->revenueTtc($start, $end);
+
         return [
-            Stat::make("Chiffre d'affaires ($label)", number_format($periodRevenue, 3, '.', ' ') . ' DT')
-                ->description($revenueGrowth >= 0 ? "+{$revenueGrowth}% vs période précédente" : "{$revenueGrowth}% vs période précédente")
+            Stat::make("Chiffre d'affaires HT ($label)", number_format($periodRevenue, 3, '.', ' ') . ' DT')
+                ->description(($revenueGrowth >= 0 ? "+{$revenueGrowth}% " : "{$revenueGrowth}% ") . "vs période précédente · TTC : " . number_format($periodTtc, 0, '.', ' ') . ' DT')
                 ->descriptionIcon($revenueGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->chart($dailyChart)
                 ->color($revenueGrowth >= 0 ? 'success' : 'danger'),
 
-            Stat::make("Chiffre d'affaires (aujourd'hui)", number_format($todayRevenue, 3, '.', ' ') . ' DT')
-                ->description("Aujourd'hui")
+            Stat::make("CA HT (aujourd'hui)", number_format($todayRevenue, 3, '.', ' ') . ' DT')
+                ->description("Aujourd'hui (HT)")
                 ->descriptionIcon('heroicon-m-calendar')
                 ->color('info'),
 

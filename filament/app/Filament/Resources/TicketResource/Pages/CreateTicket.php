@@ -16,6 +16,17 @@ class CreateTicket extends CreateRecord
         $nb = str_pad($nb, 4, '0', STR_PAD_LEFT);
         $data['numero'] = date('Y') . '/' . $nb;
 
+        $type = $data['type'] ?? Ticket::TYPE_TICKET_CAISSE;
+        if ($type === Ticket::TYPE_TICKET_CAISSE) {
+            $data['commande_id'] = null;
+        }
+        if ($type === Ticket::TYPE_BON_LIVRAISON && ! empty($data['commande_id'])) {
+            $commande = \App\Models\Commande::find($data['commande_id']);
+            if ($commande && $commande->user_id) {
+                $data['client_id'] = $commande->user_id;
+            }
+        }
+
         return $data;
     }
 }

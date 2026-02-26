@@ -5,8 +5,11 @@ namespace App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\FactureTvaResource;
 use App\Filament\Resources\TicketResource;
 use App\Filament\Widgets\DocumentTimelineWidget;
+use App\Models\Ticket;
+use App\Services\DocumentConversion\TicketToInvoiceService;
 use Filament\Actions;
 use Filament\Actions\ActionGroup;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTicket extends EditRecord
@@ -36,11 +39,21 @@ class EditTicket extends EditRecord
     {
         return [
             Actions\Action::make('createInvoice')
-                ->label('Créer facture TVA')
+                ->label('Créer Facture TVA pour ce ticket')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('success')
-                ->url(FactureTvaResource::getUrl('create'))
-                ->openUrlInNewTab(),
+                ->visible(fn () => $this->record->isTicketCaisse() && $this->record->details()->exists())
+                ->modalHeading('Créer une facture TVA (liée à ce ticket)')
+                ->modalDescription('La facture sera liée à ce ticket de caisse et ne sera pas comptée une seconde fois dans le CA.')
+                ->action(function (TicketToInvoiceService $service) {
+                    $invoice = $service->createInvoiceFromTicket($this->record);
+                    Notification::make()
+                        ->title('Facture TVA créée')
+                        ->body('Facture #' . $invoice->numero . ' créée (liée à ce ticket).')
+                        ->success()
+                        ->send();
+                    $this->redirect(FactureTvaResource::getUrl('edit', ['record' => $invoice]));
+                }),
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')

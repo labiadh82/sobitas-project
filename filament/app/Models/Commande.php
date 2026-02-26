@@ -98,6 +98,18 @@ class Commande extends Model
         return $this->hasMany(Facture::class, 'commande_id');
     }
 
+    /** Tickets used as BL (bon de livraison) for this order. */
+    public function ticketsBl(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'commande_id');
+    }
+
+    /** Facture TVA created "on request" for this order (linked, no double CA). */
+    public function factureTvas(): HasMany
+    {
+        return $this->hasMany(FactureTva::class, 'commande_id');
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'commande_id');

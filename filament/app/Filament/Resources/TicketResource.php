@@ -12,6 +12,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule;
 
 class TicketResource extends Resource
 {
@@ -33,13 +34,35 @@ class TicketResource extends Resource
         return $schema->schema([
             Section::make('Informations du ticket')
                 ->schema([
+                    Forms\Components\Select::make('type')
+                        ->label('Type de ticket')
+                        ->options(Ticket::typeOptions())
+                        ->default(Ticket::TYPE_TICKET_CAISSE)
+                        ->required()
+                        ->live()
+                        ->native(false),
+                    Forms\Components\Select::make('commande_id')
+                        ->label('Commande (obligatoire pour BL)')
+                        ->relationship(
+                            name: 'commande',
+                            titleAttribute: 'numero',
+                            modifyQueryUsing: fn ($q) => $q->where('etat', '!=', 'annuler')->orderByDesc('created_at')
+                        )
+                        ->getOptionLabelFromRecordUsing(fn ($r) => $r->numero . ' — ' . trim($r->nom . ' ' . $r->prenom) . ' — ' . number_format((float) $r->prix_ttc, 2, ',', ' ') . ' DT')
+                        ->searchable()
+                        ->preload()
+                        ->required(fn ($get) => $get('type') === Ticket::TYPE_BON_LIVRAISON)
+                        ->hidden(fn ($get) => $get('type') !== Ticket::TYPE_BON_LIVRAISON)
+                        ->helperText('Pour un Bon de livraison, sélectionnez la commande concernée.')
+                        ->dehydrated(true),
                     Forms\Components\Select::make('client_id')
                         ->label('Client')
                         ->relationship('client', 'name')
                         ->getOptionLabelFromRecordUsing(fn ($record) => (string) ($record->name ?? 'Client #' . $record->id))
                         ->searchable()
                         ->preload()
-                        ->required(),
+                        ->required(fn ($get) => $get('type') === Ticket::TYPE_TICKET_CAISSE)
+                        ->hidden(fn ($get) => $get('type') !== Ticket::TYPE_TICKET_CAISSE),
                     Forms\Components\TextInput::make('numero')
                         ->label('Numéro')
                         ->disabled()
@@ -70,6 +93,11 @@ class TicketResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight(\Filament\Support\Enums\FontWeight::Bold),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Type')
+                    ->formatStateUsing(fn (?string $s) => $s === Ticket::TYPE_BON_LIVRAISON ? 'BL' : 'Caisse')
+                    ->badge()
+                    ->color(fn (?string $s) => $s === Ticket::TYPE_BON_LIVRAISON ? 'info' : 'success'),
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client')
                     ->searchable()

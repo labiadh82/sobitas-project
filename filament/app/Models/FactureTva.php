@@ -31,6 +31,16 @@ class FactureTva extends Model
         return $this->belongsTo(Facture::class, 'facture_id');
     }
 
+    public function sourceTicket(): BelongsTo
+    {
+        return $this->belongsTo(Ticket::class, 'source_ticket_id');
+    }
+
+    public function commande(): BelongsTo
+    {
+        return $this->belongsTo(Commande::class, 'commande_id');
+    }
+
     public function details(): HasMany
     {
         return $this->hasMany(DetailsFactureTva::class, 'facture_tva_id');
@@ -44,5 +54,11 @@ class FactureTva extends Model
     public function creditNotes(): HasMany
     {
         return $this->hasMany(CreditNote::class, 'facture_tva_id');
+    }
+
+    /** Facture TVA is "linked" (on request) when it has a source ticket or commande — does NOT add to CA. */
+    public function isLinked(): bool
+    {
+        return $this->source_ticket_id !== null || $this->commande_id !== null;
     }
 }
