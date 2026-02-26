@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Client;
 
 /**
- * Client lookup/creation by phone (e.g. for orders).
+ * Client lookup/creation by phone for online orders.
  * Phone is normalized: trim, digits only, +216 prefix handled.
  */
 class ClientService
@@ -14,8 +14,7 @@ class ClientService
 
     /**
      * Normalize phone for lookup: trim, keep digits, optional +216 prefix.
-     * E.g. "+216 12 345 678", "12345678" -> "12345678" or "21612345678" for storage.
-     * We store normalized as digits only (no leading + or 0); Tunisian 8 digits.
+     * E.g. "+216 12 345 678", "12345678" -> 8 digits (Tunisian).
      */
     public function normalizePhone(?string $phone): ?string
     {
@@ -26,9 +25,8 @@ class ClientService
         if ($digits === '') {
             return null;
         }
-        // Tunisian: 216 then 8 digits, or 8 digits starting with 2/9/5/7
         if (str_starts_with($digits, '216') && strlen($digits) >= 11) {
-            $digits = substr($digits, 3); // keep 8 digits after 216
+            $digits = substr($digits, 3);
         }
         if (strlen($digits) > 8 && str_starts_with($digits, '0')) {
             $digits = ltrim($digits, '0');
@@ -37,22 +35,35 @@ class ClientService
     }
 
     /**
-     * Find client by phone (phone_1 or phone_2 normalized), or create minimal client.
-     * Returns the client and sets commande user_id to this client.
+     * Find or create client from online order delivery data.
+     * Uses phone as primary identifier; updates missing name/address/region/ville if client exists.
+     *
+     * @param  array<string, mixed>  $deliveryData  Keys: livraison_phone|phone, livraison_nom|nom, livraison_prenom|prenom, livraison_adresse1|adresse1, livraison_region|region, livraison_ville|ville, livraison_email|email, etc.
+     * @return Client|null  The client, or null if no phone provided.
      */
-    public function findOrCreateClientByPhone(
-        string $phone,
-        ?string $name = null,
-        ?string $email = null,
-        ?string $address = null,
-        ?string $region = null
-    ): ?Client {
+    public function findOrCreateClientFromDeliveryInfo(array $deliveryData): ?Client
+    {
+        $phone = $deliveryData['livraison_phone'] ?? $deliveryData['phone'] ?? null;
+        if ($phone === null || trim((string) $phone) === '') {
+            return null;
+        }
+        $phone = trim((string) $phone);
+
+        $nom = $deliveryData['livraison_nom'] ?? $deliveryData['nom'] ?? null;
+        $prenom = $deliveryData['livraison_prenom'] ?? $deliveryData['prenom'] ?? null;
+        $fullName = trim(($nom ?? '') . ' ' . ($prenom ?? ''));
+        $adresse1 = $deliveryData['livraison_adresse1'] ?? $deliveryData['adresse1'] ?? null;
+        $adresse2 = $deliveryData['livraison_adresse2'] ?? $deliveryData['adresse2'] ?? null;
+        $adresse = trim(($adresse1 ?? '') . ($adresse2 ? ' ' . $adresse2 : ''));
+        $region = $deliveryData['livraison_region'] ?? $deliveryData['region'] ?? null;
+        $ville = $deliveryData['livraison_ville'] ?? $deliveryData['ville'] ?? null;
+        $email = $deliveryData['livraison_email'] ?? $deliveryData['email'] ?? null;
+
         $normalized = $this->normalizePhone($phone);
         if ($normalized === null) {
             return null;
         }
 
-        // Match by normalized form (DB may store +216 12 345 678 or 12345678)
         $client = Client::query()
             ->whereNotNull('phone_1')
             ->orWhereNotNull('phone_2')
@@ -64,18 +75,68 @@ class ClientService
             });
 
         if ($client) {
+            $dirty = false;
+            if (($client->name === null || trim($client->name) === '') && $fullName !== '') {
+                $client->name = $fullName;
+                $dirty = true;
+            }
+            if (($client->adresse === null || trim($client->adresse) === '') && $adresse !== '') {
+                $client->adresse = $adresse;
+                $dirty = true;
+            }
+            if (($client->region === null || trim((string) $client->region) === '') && $region !== null && trim((string) $region) !== '') {
+                $client->region = $region;
+                $dirty = true;
+            }
+            if (($client->ville === null || trim((string) $client->ville) === '') && $ville !== null && trim((string) $ville) !== '') {
+                $client->ville = $ville;
+                $dirty = true;
+            }
+            if (($client->email === null || trim($client->email) === '') && $email !== null && trim((string) $email) !== '') {
+                $client->email = $email;
+                $dirty = true;
+            }
+            if ($dirty) {
+                $client->save();
+            }
             return $client;
         }
 
         $client = new Client();
-        $client->name = $name ?: 'Client ' . substr($normalized, -4);
+        $client->name = $fullName !== '' ? $fullName : 'Client ' . substr($normalized, -4);
         $client->phone_1 = $phone;
         $client->email = $email;
-        $client->adresse = $address;
+        $client->adresse = $adresse ?: null;
+        $client->region = $region ?: null;
+        $client->ville = $ville ?: null;
         $client->source = self::SOURCE_ONLINE;
         $client->sms = false;
         $client->save();
 
         return $client;
+    }
+
+    /**
+     * Find client by phone (phone_1 or phone_2 normalized), or create minimal client.
+     * Prefer findOrCreateClientFromDeliveryInfo for full delivery data.
+     */
+    public function findOrCreateClientByPhone(
+        string $phone,
+        ?string $name = null,
+        ?string $email = null,
+        ?string $address = null,
+        ?string $region = null
+    ): ?Client {
+        return $this->findOrCreateClientFromDeliveryInfo([
+            'phone' => $phone,
+            'livraison_nom' => $name,
+            'nom' => $name,
+            'email' => $email,
+            'livraison_email' => $email,
+            'livraison_adresse1' => $address,
+            'adresse1' => $address,
+            'livraison_region' => $region,
+            'region' => $region,
+        ]);
     }
 }

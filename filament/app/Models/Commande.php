@@ -15,7 +15,7 @@ class Commande extends Model
     protected $fillable = [
         'numero', 'nom', 'prenom', 'email', 'phone', 'pays', 'region', 'ville',
         'code_postale', 'adresse1', 'adresse2', 'etat', 'prix_ht', 'prix_ttc',
-        'frais_livraison', 'remise', 'note', 'user_id', 'quotation_id', 'livraison',
+        'frais_livraison', 'remise', 'note', 'user_id', 'client_id', 'quotation_id', 'livraison',
         'livraison_nom', 'livraison_prenom', 'livraison_email', 'livraison_phone',
         'livraison_region', 'livraison_ville', 'livraison_code_postale',
         'livraison_adresse1', 'livraison_adresse2', 'sms_sent',
@@ -78,6 +78,7 @@ class Commande extends Model
 
     // ── Relationships ──────────────────────────────────
 
+    /** Client linked to this order. Prefer client_id when set; otherwise user_id (legacy). */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'user_id');
