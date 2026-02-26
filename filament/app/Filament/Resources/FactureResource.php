@@ -41,12 +41,14 @@ class FactureResource extends Resource
         return $schema->schema([
             Grid::make(2)->schema([
                 Section::make('Entreprise')
+                    ->icon('heroicon-o-building-office-2')
                     ->schema([
                         Forms\Components\Placeholder::make('company_info')
                             ->label('')
-                            ->content(fn () => $coordinate ? view('filament.components.company-info', ['coordinate' => $coordinate])->render() : '—'),
+                            ->content(fn () => $coordinate ? new \Illuminate\Support\HtmlString(view('filament.components.company-info', ['coordinate' => $coordinate])->render()) : '—'),
                     ]),
                 Section::make('Client')
+                    ->icon('heroicon-o-user')
                     ->schema([
                         Forms\Components\Select::make('client_id')
                             ->label('Client')
@@ -56,7 +58,7 @@ class FactureResource extends Resource
                             ->preload()
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, $set) {
                                 if ($state) {
                                     $client = Client::find($state);
                                     $set('client_adresse', $client?->adresse ?? '');
@@ -78,10 +80,12 @@ class FactureResource extends Resource
             ])->columnSpanFull(),
 
             Section::make('Produits')
+                ->icon('heroicon-o-cube')
+                ->description('Scannez un code-barres ou ajoutez des lignes manuellement.')
                 ->schema([
                     Forms\Components\Placeholder::make('barcode_scan')
                         ->label('Scanner code à barre')
-                        ->content(fn () => view('filament.components.barcode-scan')->render()),
+                        ->content(fn () => new \Illuminate\Support\HtmlString(view('filament.components.barcode-scan')->render())),
                     Repeater::make('details')
                         ->label('')
                         ->schema([
@@ -92,7 +96,7 @@ class FactureResource extends Resource
                                 ->preload()
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                ->afterStateUpdated(function ($state, $set) {
                                     if ($state && $product = \App\Models\Product::find($state)) {
                                         $set('prix_unitaire', (float) ($product->prix ?? 0));
                                     }
@@ -123,6 +127,7 @@ class FactureResource extends Resource
             Grid::make(2)->schema([
                 Forms\Components\Placeholder::make('_spacer')->label('')->content('')->columnSpan(1),
                 Section::make('Totaux')
+                    ->icon('heroicon-o-calculator')
                     ->schema([
                         Forms\Components\TextInput::make('prix_ht')
                             ->label('Montant Total')
@@ -138,7 +143,7 @@ class FactureResource extends Resource
                             ->default(0)
                             ->live(),
                         Forms\Components\TextInput::make('pourcentage_remise')
-                            ->label('Poucentage Remise %')
+                            ->label('Pourcentage Remise %')
                             ->numeric()
                             ->suffix('%')
                             ->default(0)

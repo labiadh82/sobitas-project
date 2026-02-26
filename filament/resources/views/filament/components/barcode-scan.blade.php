@@ -1,10 +1,11 @@
 <div class="space-y-2" x-data="{ barcode: '' }" x-init="$nextTick(() => $refs.barcodeInput?.focus())">
     <label class="fi-fo-field-wrp-label inline-flex items-center gap-x-2">
+        <x-filament::icon icon="heroicon-o-qr-code" class="w-5 h-5 text-primary-500 dark:text-primary-400" />
         <span class="text-sm font-medium text-gray-950 dark:text-white">Scanner code à barre</span>
     </label>
     <input
         type="text"
-        placeholder="barcode"
+        placeholder="Scannez ou saisissez le code-barres puis Entrée"
         x-model="barcode"
         x-ref="barcodeInput"
         @keydown.enter.prevent="

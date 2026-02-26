@@ -39,7 +39,7 @@ class FactureTvaResource extends Resource
                     ->schema([
                         Forms\Components\Placeholder::make('company_info')
                             ->label('')
-                            ->content(fn () => $coordinate ? view('filament.components.company-info', ['coordinate' => $coordinate])->render() : '—'),
+                            ->content(fn () => $coordinate ? new \Illuminate\Support\HtmlString(view('filament.components.company-info', ['coordinate' => $coordinate])->render()) : '—'),
                     ]),
                 Section::make('Client')
                     ->schema([
@@ -51,7 +51,7 @@ class FactureTvaResource extends Resource
                             ->preload()
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, $set) {
                                 if ($state) {
                                     $client = Client::find($state);
                                     $set('client_adresse', $client?->adresse ?? '');
@@ -70,7 +70,7 @@ class FactureTvaResource extends Resource
                 ->schema([
                     Forms\Components\Placeholder::make('barcode_scan')
                         ->label('Scanner code à barre')
-                        ->content(fn () => view('filament.components.barcode-scan')->render()),
+                        ->content(fn () => new \Illuminate\Support\HtmlString(view('filament.components.barcode-scan')->render())),
                     Repeater::make('details')
                         ->label('')
                         ->schema([
@@ -81,7 +81,7 @@ class FactureTvaResource extends Resource
                                 ->preload()
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                ->afterStateUpdated(function ($state, $set) {
                                     if ($state && $product = \App\Models\Product::find($state)) {
                                         $set('prix_unitaire', (float) ($product->prix ?? 0));
                                     }
