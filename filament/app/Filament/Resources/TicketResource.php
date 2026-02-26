@@ -269,6 +269,7 @@ class TicketResource extends Resource
                     ->modalContent(fn (Ticket $record) => view('filament.components.print-modal', [
                         'printUrl' => route('tickets.print', ['ticket' => $record->id]),
                         'title' => 'Ticket ' . $record->numero,
+                        'documentType' => 'ticket',
                     ]))
                     ->modalSubmitAction(false),
                 Actions\DeleteAction::make(),

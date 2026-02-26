@@ -1,22 +1,9 @@
-{{-- Print A4 design system - professional, high contrast, repeat header. Centered in aperçu. --}}
+{{-- Print A4 design system - professional, high contrast, repeat header --}}
 <style>
     @page { size: A4; margin: 12mm; }
     * { box-sizing: border-box; }
-    html { width: 100%; }
-    .print-doc-body {
-        margin: 0;
-        width: 100%;
-        min-height: 100vh;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 13px;
-        line-height: 1.45;
-        color: #1a1a1a;
-        background: #e2e8f0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .print-toolbar { width: 210mm; margin: 12px 0 0 0; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .print-doc-body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; line-height: 1.45; color: #1a1a1a; background: #f1f5f9; min-height: 100vh; }
+    .print-toolbar { max-width: 210mm; margin: 12px auto 0; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .print-toolbar-label { font-size: 13px; color: #64748b; }
     .print-toolbar-actions { display: flex; gap: 8px; }
     .print-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
@@ -26,7 +13,7 @@
     .print-btn-ghost { background: #fff; color: #475569; border: 1px solid #e2e8f0; }
     .print-btn-ghost:hover { background: #f8fafc; }
 
-    .print-sheet { width: 210mm; min-height: 297mm; margin: 16px 0; padding: 20px 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    .print-sheet { width: 210mm; min-height: 297mm; margin: 16px auto; padding: 20px 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
     .print-header { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
     .print-logo { max-width: 160px; max-height: 48px; object-fit: contain; }
     .print-company-name { font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 8px; }
@@ -67,7 +54,7 @@
 
     @media print {
         .no-print, .print-toolbar { display: none !important; }
-        .print-doc-body { background: #fff; display: block; width: auto; }
+        .print-doc-body { background: #fff; }
         .print-sheet { margin: 0; padding: 0; box-shadow: none; border-radius: 0; width: 100% !important; max-width: none; }
         .print-table thead { display: table-header-group; }
         .print-table tr { break-inside: avoid; page-break-inside: avoid; }

@@ -166,6 +166,7 @@ class EditTicket extends EditRecord
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('tickets.print', ['ticket' => $this->record->id]),
                     'title' => 'Ticket ' . $this->record->numero,
+                    'documentType' => 'ticket',
                 ]))
                 ->modalSubmitAction(false),
             ActionGroup::make([
