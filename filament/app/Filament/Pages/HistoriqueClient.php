@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 
 class HistoriqueClient extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-magnifying-glass';
 
     protected static ?string $navigationLabel = 'Historique Client';
 
