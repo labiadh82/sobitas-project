@@ -64,7 +64,9 @@ class Ticket extends Model
         static::saving(function (Ticket $ticket) {
             $type = $ticket->type ?? self::TYPE_TICKET_CAISSE;
             if ($type === self::TYPE_BON_LIVRAISON && empty($ticket->commande_id)) {
-                throw new \InvalidArgumentException('Un Bon de livraison doit être lié à une commande.');
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'commande_id' => ['Un Bon de livraison doit être lié à une commande.'],
+                ]);
             }
             if ($type === self::TYPE_TICKET_CAISSE) {
                 $ticket->commande_id = null;

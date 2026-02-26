@@ -80,7 +80,7 @@ class DocumentChainService
             case self::TYPE_FACTURE_TVA:
                 $factureTva = $record;
                 $facture = $hasFactureId ? $factureTva->facture : null;
-                $commande = $facture?->commande;
+                $commande = $factureTva->commande ?? $facture?->commande;
                 $quotation = $commande?->quotation;
                 if (Schema::hasTable('payments')) {
                     $paidTotal = (float) $factureTva->payments()->where('status', 'succeeded')->sum('amount');
