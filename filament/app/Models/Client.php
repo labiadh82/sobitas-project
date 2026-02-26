@@ -11,7 +11,8 @@ class Client extends Model
 
     protected $fillable = [
         'name', 'email', 'phone_1', 'phone_2', 'adresse', 'matricule',
-        'sms', 'password',
+        'sms', 'password', 'source',
+        'loyalty_enabled', 'loyalty_percent', 'loyalty_note',
     ];
 
     protected $hidden = [
@@ -20,6 +21,7 @@ class Client extends Model
 
     protected $casts = [
         'sms' => 'boolean',
+        'loyalty_enabled' => 'boolean',
     ];
 
     // ── Relationships ──────────────────────────────────

@@ -9,6 +9,7 @@ use App\Models\Commande;
 use App\Models\CommandeDetail;
 use App\Models\Message;
 use App\Models\Product;
+use App\Services\ClientService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,20 @@ class CommandeController extends Controller
 
             if (! empty($commandeData['user_id'])) {
                 $new_facture->user_id = $commandeData['user_id'];
+            } else {
+                $phone = $new_facture->phone ?: ($commandeData['phone'] ?? null);
+                if ($phone) {
+                    $client = app(ClientService::class)->findOrCreateClientByPhone(
+                        $phone,
+                        trim(($new_facture->nom ?? '') . ' ' . ($new_facture->prenom ?? '')) ?: null,
+                        $new_facture->email,
+                        $new_facture->adresse1 ?: $new_facture->adresse2,
+                        $new_facture->region
+                    );
+                    if ($client) {
+                        $new_facture->user_id = $client->id;
+                    }
+                }
             }
 
             $new_facture->livraison_nom = $commandeData['livraison_nom'] ?? null;

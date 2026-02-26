@@ -163,17 +163,15 @@ class TicketResource extends Resource
                 ])
                 ->columnSpanFull(),
 
-            // Totals: Montant Total, Montant Remise, Pourcentage Remise %, Net à payer
+            // Totals: Montant Total, Montant Remise, Pourcentage Remise %, Net à payer (reactive so they always show current values)
             Section::make('Totaux')
                 ->schema([
-                    Forms\Components\TextInput::make('prix_ht')
+                    Forms\Components\Placeholder::make('prix_ht_display')
                         ->label('Montant Total')
-                        ->numeric()
-                        ->prefix('DT')
-                        ->disabled()
-                        ->dehydrated(true)
-                        ->default(0)
-                        ->extraInputAttributes(['class' => 'text-right']),
+                        ->content(function ($get) {
+                            [$total] = self::computeTicketTotals($get);
+                            return 'DT ' . number_format((float) $total, 3, ',', ' ');
+                        }),
                     Forms\Components\TextInput::make('remise')
                         ->label('Montant Remise')
                         ->numeric()
@@ -194,14 +192,14 @@ class TicketResource extends Resource
                             self::recalculateTicketTotals($get, $set);
                         })
                         ->extraInputAttributes(['class' => 'text-right']),
-                    Forms\Components\TextInput::make('prix_ttc')
+                    Forms\Components\Placeholder::make('prix_ttc_display')
                         ->label('Net à payer')
-                        ->numeric()
-                        ->prefix('DT')
-                        ->disabled()
-                        ->dehydrated(true)
-                        ->default(0)
-                        ->extraInputAttributes(['class' => 'text-right']),
+                        ->content(function ($get) {
+                            [, , $net] = self::computeTicketTotals($get);
+                            return 'DT ' . number_format((float) $net, 3, ',', ' ');
+                        }),
+                    Forms\Components\Hidden::make('prix_ht')->default(0)->dehydrated(true),
+                    Forms\Components\Hidden::make('prix_ttc')->default(0)->dehydrated(true),
                 ])
                 ->columns(4)
                 ->columnSpanFull(),
@@ -210,7 +208,10 @@ class TicketResource extends Resource
         ]);
     }
 
-    public static function recalculateTicketTotals($get, $set): void
+    /**
+     * Compute totals from form state. Returns [total, remiseAmount, net].
+     */
+    public static function computeTicketTotals($get): array
     {
         $details = $get('details') ?? [];
         $total = 0.0;
@@ -225,7 +226,14 @@ class TicketResource extends Resource
             $remiseAmount = $total * $remisePct / 100;
         }
         $net = max(0, $total - $remiseAmount);
+        return [$total, $remiseAmount, $net];
+    }
+
+    public static function recalculateTicketTotals($get, $set): void
+    {
+        [$total, $remiseAmount, $net] = self::computeTicketTotals($get);
         $set('prix_ht', $total);
+        $set('remise', $remiseAmount);
         $set('prix_ttc', $net);
     }
 
