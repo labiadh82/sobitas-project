@@ -14,7 +14,8 @@ return new class extends Migration
 
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('facture_tva_id')->nullable();
+            // Match facture_tvas.id type (older DBs may use INT UNSIGNED)
+            $table->unsignedInteger('facture_tva_id')->nullable();
             $table->unsignedBigInteger('commande_id')->nullable();
             $table->string('method', 32); // COD, Stripe, PayPal
             $table->decimal('amount', 14, 3)->default(0);

@@ -14,7 +14,8 @@ return new class extends Migration
 
         Schema::create('credit_notes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('facture_tva_id');
+            // Match facture_tvas.id type: older DBs may use INT UNSIGNED (increments), so use unsignedInteger
+            $table->unsignedInteger('facture_tva_id');
             $table->string('numero', 64)->unique();
             $table->decimal('total_ht', 14, 3)->default(0);
             $table->decimal('total_ttc', 14, 3)->default(0);

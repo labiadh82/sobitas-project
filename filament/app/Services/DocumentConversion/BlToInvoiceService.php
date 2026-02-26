@@ -30,11 +30,15 @@ class BlToInvoiceService
             $defaultTvaPct = $coordinate && isset($coordinate->tva) ? (float) $coordinate->tva : 19;
 
             $invoice = new FactureTva();
-            $invoice->facture_id = $bl->id;
+            if (Schema::hasColumn('facture_tvas', 'facture_id')) {
+                $invoice->facture_id = $bl->id;
+            }
             $invoice->client_id = $bl->client_id;
             $invoice->numero = $this->numberSequence->nextFacture();
             $invoice->status = InvoiceStatus::Draft;
-            $invoice->date_facture = now()->toDateString();
+            if (Schema::hasColumn('facture_tvas', 'date_facture')) {
+                $invoice->date_facture = now()->toDateString();
+            }
             $invoice->prix_ht = (float) $bl->prix_ht;
             $invoice->timbre = (float) ($bl->timbre ?? 0);
             $invoice->remise = (float) ($bl->remise ?? 0);
