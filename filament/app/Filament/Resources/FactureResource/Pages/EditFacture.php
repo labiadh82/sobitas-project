@@ -91,7 +91,6 @@ class EditFacture extends EditRecord
                 ->label('Transformer en facture TVA')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('success')
-                ->size(Actions\Action::SizeLarge)
                 ->visible(fn () => Schema::hasColumn('facture_tvas', 'facture_id') && ! $this->record->factureTvas()->exists())
                 ->modalHeading('Conversion : BL → Facture TVA')
                 ->modalDescription('Récapitulatif avant création de la facture TVA.')
@@ -115,7 +114,6 @@ class EditFacture extends EditRecord
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->size(Actions\Action::SizeLarge)
                 ->modalHeading('Aperçu d\'impression')
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('factures.print', ['facture' => $this->record->id]),

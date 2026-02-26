@@ -8,6 +8,7 @@ use App\Models\CommandeDetail;
 use App\Models\Quotation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class QuotationConversionService
 {
@@ -69,7 +70,7 @@ class QuotationConversionService
 
     protected function audit(string $action, $entity, array $after = []): void
     {
-        if (! class_exists(AuditLog::class)) {
+        if (! class_exists(AuditLog::class) || ! Schema::hasTable('audit_logs')) {
             return;
         }
         AuditLog::create([

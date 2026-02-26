@@ -85,7 +85,6 @@ class EditQuotation extends EditRecord
                 ->label('Transformer en commande')
                 ->icon('heroicon-o-arrow-right-circle')
                 ->color('success')
-                ->size(Actions\Action::SizeLarge)
                 ->visible(fn () => ! $this->record->commandes()->exists())
                 ->modalHeading('Conversion : Devis → Commande')
                 ->modalDescription('Récapitulatif avant création de la commande.')
@@ -109,7 +108,6 @@ class EditQuotation extends EditRecord
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->size(Actions\Action::SizeLarge)
                 ->modalHeading('Aperçu d\'impression')
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('quotations.print', ['quotation' => $this->record->id]),

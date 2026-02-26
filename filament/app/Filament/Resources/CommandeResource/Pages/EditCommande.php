@@ -41,7 +41,6 @@ class EditCommande extends EditRecord
                 ->label('Créer BL (Bon de livraison)')
                 ->icon('heroicon-o-document-text')
                 ->color('success')
-                ->size(Actions\Action::SizeLarge)
                 ->visible(fn () => ! $this->record->factures()->exists())
                 ->modalHeading('Conversion : Commande → Bon de livraison')
                 ->modalDescription('Récapitulatif avant création du BL.')
@@ -65,7 +64,6 @@ class EditCommande extends EditRecord
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->size(Actions\Action::SizeLarge)
                 ->url(fn () => $this->record->factures()->first() ? route('factures.print', ['facture' => $this->record->factures->first()->id]) : null)
                 ->openUrlInNewTab()
                 ->visible(fn () => $this->record->factures()->exists()),

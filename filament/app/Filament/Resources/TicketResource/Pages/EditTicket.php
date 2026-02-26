@@ -39,13 +39,11 @@ class EditTicket extends EditRecord
                 ->label('Créer facture TVA')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('success')
-                ->size(Actions\Action::SizeLarge)
                 ->url(FactureTvaResource::getUrl('create'))
                 ->openUrlInNewTab(),
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->size(Actions\Action::SizeLarge)
                 ->modalHeading('Aperçu d\'impression')
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('tickets.print', ['ticket' => $this->record->id]),

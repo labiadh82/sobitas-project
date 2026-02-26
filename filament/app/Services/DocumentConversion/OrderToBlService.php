@@ -9,6 +9,7 @@ use App\Models\DetailsFacture;
 use App\Models\Facture;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class OrderToBlService
 {
@@ -65,7 +66,7 @@ class OrderToBlService
 
     protected function audit(string $action, $entity, array $after = []): void
     {
-        if (! class_exists(AuditLog::class)) {
+        if (! class_exists(AuditLog::class) || ! Schema::hasTable('audit_logs')) {
             return;
         }
         AuditLog::create([

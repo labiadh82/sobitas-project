@@ -10,6 +10,7 @@ use App\Models\Facture;
 use App\Models\FactureTva;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class BlToInvoiceService
 {
@@ -86,7 +87,7 @@ class BlToInvoiceService
 
     protected function audit(string $action, $entity, array $after = []): void
     {
-        if (! class_exists(AuditLog::class)) {
+        if (! class_exists(AuditLog::class) || ! Schema::hasTable('audit_logs')) {
             return;
         }
         AuditLog::create([

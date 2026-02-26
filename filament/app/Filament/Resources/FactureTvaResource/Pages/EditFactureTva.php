@@ -103,7 +103,6 @@ class EditFactureTva extends EditRecord
                 ->label('Enregistrer paiement')
                 ->icon('heroicon-o-banknotes')
                 ->color('success')
-                ->size(Actions\Action::SizeLarge)
                 ->form([
                     Forms\Components\TextInput::make('amount')
                         ->label('Montant (DT)')
@@ -143,7 +142,6 @@ class EditFactureTva extends EditRecord
             Actions\Action::make('createCreditNote')
                 ->label('Créer un avoir')
                 ->icon('heroicon-o-document-minus')
-                ->size(Actions\Action::SizeLarge)
                 ->url(fn () => CreditNoteResource::getUrl('create') . '?facture_tva_id=' . $this->record->id),
             ActionGroup::make([
                 Actions\Action::make('print')
