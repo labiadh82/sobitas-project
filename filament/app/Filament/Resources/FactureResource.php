@@ -111,7 +111,7 @@ class FactureResource extends Resource
                                 ->required(),
                             Forms\Components\Placeholder::make('prix_total_display')
                                 ->label('P.T')
-                                ->content(fn (Forms\Get $get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
+                                ->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
                         ])
                         ->columns(4)
                         ->defaultItems(1)

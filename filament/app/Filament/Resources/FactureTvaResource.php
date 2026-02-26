@@ -88,9 +88,9 @@ class FactureTvaResource extends Resource
                                 }),
                             Forms\Components\TextInput::make('qte')->label('Qté')->numeric()->default(1)->minValue(1)->required(),
                             Forms\Components\TextInput::make('prix_unitaire')->label('P.U')->numeric()->default(0)->prefix('DT')->required(),
-                            Forms\Components\Placeholder::make('prix_ht_display')->label('P.T/HT')->content(fn (Forms\Get $get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
+                            Forms\Components\Placeholder::make('prix_ht_display')->label('P.T/HT')->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
                             Forms\Components\TextInput::make('tva_pct')->label('TVA (%)')->numeric()->default($defaultTva)->suffix('%')->required(),
-                            Forms\Components\Placeholder::make('prix_ttc_display')->label('TVA')->content(fn (Forms\Get $get) => number_format((float) $get('qte') * (float) $get('prix_unitaire') * (float) ($get('tva_pct') ?? $defaultTva) / 100, 3, '.', ' ') . ' DT'),
+                            Forms\Components\Placeholder::make('prix_ttc_display')->label('TVA')->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire') * (float) ($get('tva_pct') ?? $defaultTva) / 100, 3, '.', ' ') . ' DT'),
                         ])
                         ->columns(5)
                         ->defaultItems(1)
