@@ -12,7 +12,16 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Source Sans Pro', sans-serif; }
-        body { background: #f1f5f9; min-height: 100vh; padding: 16px 0; display: flex; flex-direction: column; align-items: center; }
+        html { width: 100%; }
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: #e2e8f0;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .no-print { margin-bottom: 12px; }
         .receipt-btn { border-radius: 3px; font-size: 14px; padding: 6px 15px; border: 0; cursor: pointer; background: #3e46df; color: #fff; }
         .container {
@@ -107,7 +116,7 @@
             font-size: 14px;
         }
         @media print {
-            body { background: #fff; padding: 0; display: block; }
+            html, body { background: #fff; padding: 0; display: block; width: auto; }
             .no-print { display: none !important; }
             .container { box-shadow: none; margin: 0; }
         }
