@@ -21,6 +21,7 @@ use App\Filament\Resources\CategResource;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\CommandeResource;
 use App\Filament\Resources\ContactResource;
+use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\CoordinateResource;
 use App\Filament\Resources\FactureResource;
 use App\Filament\Resources\FactureTvaResource;
@@ -114,6 +115,7 @@ class AdminPanelProvider extends PanelProvider
                 CoordinateResource::class,
                 FactureResource::class,
                 FactureTvaResource::class,
+                CreditNoteResource::class,
                 FaqResource::class,
                 MessageResource::class,
                 NewsletterResource::class,
