@@ -7,7 +7,7 @@ use Filament\Widgets\Widget;
 
 class ClientHistoriqueSearchWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.client-historique-search-widget';
+    protected string $view = 'filament.widgets.client-historique-search-widget';
 
     protected static ?int $sort = -99;
 
