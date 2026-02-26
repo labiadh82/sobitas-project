@@ -63,7 +63,7 @@ class HistoriqueClient extends Page
         return 'Historique Client';
     }
 
-    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?string $tenant = null): string
+    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null): string
     {
         $params = isset($parameters['tel']) ? ['tel' => $parameters['tel']] : [];
         return parent::getUrl($params, $isAbsolute, $panel, $tenant);
