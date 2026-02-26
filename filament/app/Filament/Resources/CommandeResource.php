@@ -162,8 +162,19 @@ class CommandeResource extends Resource
                     ->options(Commande::getStatusOptions()),
             ])
             ->actions([
-                Actions\ViewAction::make(),
                 Actions\EditAction::make(),
+                Actions\Action::make('createBl')
+                    ->label('Créer BL')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->visible(fn (Commande $record): bool => ! $record->factures()->exists())
+                    ->requiresConfirmation()
+                    ->modalSubmitActionLabel('Confirmer')
+                    ->action(function (Commande $record) {
+                        $bl = app(\App\Services\DocumentConversion\OrderToBlService::class)->createBlFromOrder($record);
+                        Notification::make()->title('BL #' . $bl->numero . ' créé')->success()->send();
+                        return redirect(\App\Filament\Resources\FactureResource::getUrl('edit', ['record' => $bl]));
+                    }),
                 Actions\Action::make('sendSmsNotification')
                     ->label('SMS')
                     ->icon('heroicon-o-chat-bubble-left')

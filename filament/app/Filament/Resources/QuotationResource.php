@@ -187,6 +187,15 @@ class QuotationResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(25)
             ->filters([
+                Tables\Filters\SelectFilter::make('statut')
+                    ->label('Statut')
+                    ->options([
+                        'brouillon' => 'Brouillon',
+                        'en_attente' => 'En attente',
+                        'valide' => 'Validé',
+                        'refuse' => 'Refusé',
+                    ])
+                    ->placeholder('Tous les statuts'),
                 Tables\Filters\Filter::make('date')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Du'),
@@ -200,6 +209,21 @@ class QuotationResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make(),
+                Actions\Action::make('convertToOrder')
+                    ->label('Transformer en commande')
+                    ->icon('heroicon-o-arrow-right-circle')
+                    ->color('success')
+                    ->visible(fn (Quotation $record): bool => ! $record->commandes()->exists())
+                    ->requiresConfirmation()
+                    ->modalSubmitActionLabel('Confirmer')
+                    ->action(function (Quotation $record) {
+                        $commande = app(\App\Services\DocumentConversion\QuotationConversionService::class)->convertToOrder($record);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Commande #' . $commande->numero . ' créée')
+                            ->success()
+                            ->send();
+                        return redirect(\App\Filament\Resources\CommandeResource::getUrl('edit', ['record' => $commande]));
+                    }),
                 Actions\Action::make('print')
                     ->label('Imprimer')
                     ->icon('heroicon-o-printer')

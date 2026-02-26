@@ -55,4 +55,110 @@
         .print-section, .print-section * { visibility: visible; }
         .print-section { position: absolute; left: 0; top: 0; width: 100%; z-index: 9999; }
     }
+
+    /* ── Document pages: sticky action bar ───────────────────────────────────── */
+    .fi-page-header-main-ctn {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: var(--fi-body-bg, #fff);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+        padding: 12px 0;
+        margin: -12px 0 12px 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .dark .fi-page-header-main-ctn { background: var(--fi-body-bg); }
+    /* Large, obvious header actions */
+    .fi-page-header-main-ctn .fi-header-actions .fi-btn {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+    .fi-page-header-main-ctn .fi-header-actions .fi-btn:first-child {
+        background-color: rgb(249 115 22);
+        color: #fff;
+        border-color: rgb(249 115 22);
+    }
+    .fi-page-header-main-ctn .fi-header-actions .fi-btn:first-child:hover {
+        background-color: rgb(234 88 12);
+        color: #fff;
+    }
+
+    /* ── Document timeline panel ────────────────────────────────────────────── */
+    .doc-timeline-wrap { margin-bottom: 24px; }
+    .doc-timeline-card {
+        background: var(--fi-body-bg, #fff);
+        border: 1px solid rgb(229 231 235);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    }
+    .dark .doc-timeline-card { border-color: rgb(55 65 81); }
+    .doc-timeline-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgb(107 114 128);
+        margin-bottom: 12px;
+    }
+    .doc-timeline-track {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 4px;
+    }
+    .doc-timeline-node {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .doc-timeline-node-inner {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgb(249 250 251);
+        border: 1px solid rgb(229 231 235);
+        font-size: 0.8125rem;
+    }
+    .dark .doc-timeline-node-inner { background: rgb(55 65 81); border-color: rgb(75 85 99); }
+    .doc-timeline-node-inner--link {
+        text-decoration: none;
+        color: inherit;
+    }
+    .doc-timeline-node-inner--link:hover {
+        background: rgb(243 244 246);
+        border-color: rgb(249 115 22);
+    }
+    .dark .doc-timeline-node-inner--link:hover { background: rgb(75 85 99); }
+    .doc-timeline-node--current .doc-timeline-node-inner {
+        background: rgb(255 237 213);
+        border-color: rgb(249 115 22);
+        font-weight: 600;
+    }
+    .dark .doc-timeline-node--current .doc-timeline-node-inner { background: rgb(67 20 7); border-color: rgb(249 115 22); }
+    .doc-timeline-node-label { font-weight: 500; }
+    .doc-timeline-node-number { color: rgb(30 64 175); font-variant-numeric: tabular-nums; }
+    .doc-timeline-node-empty { color: rgb(107 114 128); font-style: italic; }
+    .doc-timeline-node-status { font-size: 0.6875rem; padding: 2px 6px; border-radius: 9999px; background: rgb(209 213 219); color: rgb(55 65 81); }
+    .doc-timeline-node-date, .doc-timeline-node-total { color: rgb(107 114 128); font-size: 0.75rem; }
+    .doc-timeline-arrow { color: rgb(156 163 175); padding: 0 4px; font-size: 0.875rem; }
+    .doc-badge { display: inline-block; }
+    .doc-btn { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; text-decoration: none; }
+    .doc-btn--primary { background: rgb(249 115 22); color: #fff; border: none; }
+    .doc-btn--primary:hover { background: rgb(234 88 12); color: #fff; }
+    .doc-btn--sm { padding: 2px 8px; font-size: 0.6875rem; }
+
+    /* Conversion wizard summary */
+    .convert-wizard-summary { padding: 8px 0; }
+    .convert-wizard-label { font-size: 0.75rem; font-weight: 600; color: rgb(107 114 128); margin-bottom: 8px; }
+    .convert-wizard-dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 0.875rem; }
+    .convert-wizard-dl dt { color: rgb(107 114 128); }
+    .convert-wizard-dl dd { margin: 0; }
+    .convert-wizard-hint { margin-top: 16px; font-size: 0.8125rem; color: rgb(107 114 128); }
 </style>

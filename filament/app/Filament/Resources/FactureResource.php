@@ -231,8 +231,30 @@ class FactureResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(25)
             ->striped()
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Statut')
+                    ->options([
+                        'draft' => 'Brouillon',
+                        'issued' => 'Émis',
+                        'delivered' => 'Livré',
+                    ])
+                    ->placeholder('Tous'),
+            ])
             ->actions([
                 Actions\EditAction::make(),
+                Actions\Action::make('convertToInvoice')
+                    ->label('Transformer en facture TVA')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('success')
+                    ->visible(fn (Facture $record): bool => \Illuminate\Support\Facades\Schema::hasColumn('facture_tvas', 'facture_id') && ! $record->factureTvas()->exists())
+                    ->requiresConfirmation()
+                    ->modalSubmitActionLabel('Confirmer')
+                    ->action(function (Facture $record) {
+                        $invoice = app(\App\Services\DocumentConversion\BlToInvoiceService::class)->createInvoiceFromBl($record);
+                        \Filament\Notifications\Notification::make()->title('Facture #' . $invoice->numero . ' créée')->success()->send();
+                        return redirect(\App\Filament\Resources\FactureTvaResource::getUrl('edit', ['record' => $invoice]));
+                    }),
                 Actions\Action::make('print')
                     ->label('Imprimer')
                     ->icon('heroicon-o-printer')

@@ -4,16 +4,24 @@ namespace App\Filament\Resources\FactureResource\Pages;
 
 use App\Filament\Resources\FactureResource;
 use App\Filament\Resources\FactureTvaResource;
+use App\Filament\Widgets\DocumentTimelineWidget;
 use App\Models\DetailsFacture;
 use App\Models\Product;
 use App\Services\DocumentConversion\BlToInvoiceService;
 use Filament\Actions;
+use Filament\Actions\ActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Schema;
 
 class EditFacture extends EditRecord
 {
     protected static string $resource = FactureResource::class;
+
+    public function getHeaderWidgets(): array
+    {
+        return [DocumentTimelineWidget::class];
+    }
 
     public function getHeading(): string
     {
@@ -29,7 +37,7 @@ class EditFacture extends EditRecord
         if ($this->record->commande_id) {
             $parts[] = 'Commande : #' . $this->record->commande?->numero;
         }
-        if ($this->record->factureTvas()->exists()) {
+        if (Schema::hasColumn('facture_tvas', 'facture_id') && $this->record->factureTvas()->exists()) {
             $parts[] = 'Facture TVA : #' . $this->record->factureTvas->first()?->numero;
         }
 
@@ -77,19 +85,28 @@ class EditFacture extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $r = $this->record;
         return [
             Actions\Action::make('convertToInvoice')
                 ->label('Transformer en facture TVA')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('success')
-                ->visible(fn () => ! $this->record->factureTvas()->exists())
-                ->requiresConfirmation()
-                ->modalHeading('Créer une facture TVA à partir de ce BL')
-                ->modalSubmitActionLabel('Créer la facture')
+                ->size(Actions\Action::SizeLarge)
+                ->visible(fn () => Schema::hasColumn('facture_tvas', 'facture_id') && ! $this->record->factureTvas()->exists())
+                ->modalHeading('Conversion : BL → Facture TVA')
+                ->modalDescription('Récapitulatif avant création de la facture TVA.')
+                ->modalSubmitActionLabel('Confirmer la conversion')
+                ->modalContent(fn () => view('filament.components.convert-wizard-summary', [
+                    'sourceNumber' => $r->numero,
+                    'client' => $r->client?->name ?? '—',
+                    'date' => $r->created_at?->format('d/m/Y'),
+                    'itemsCount' => $r->details->count(),
+                    'totalTtc' => number_format((float)($r->prix_ttc ?? 0), 3, ',', ' ') . ' DT',
+                ]))
                 ->action(function (BlToInvoiceService $service) {
                     $invoice = $service->createInvoiceFromBl($this->record);
                     Notification::make()
-                        ->title('Facture TVA créée')
+                        ->title('Conversion réussie')
                         ->body('Facture #' . $invoice->numero . ' a été créée.')
                         ->success()
                         ->send();
@@ -98,14 +115,16 @@ class EditFacture extends EditRecord
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->color('gray')
+                ->size(Actions\Action::SizeLarge)
                 ->modalHeading('Aperçu d\'impression')
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('factures.print', ['facture' => $this->record->id]),
                     'title' => 'Bon de livraison ' . $this->record->numero,
                 ]))
                 ->modalSubmitAction(false),
-            Actions\DeleteAction::make(),
+            ActionGroup::make([
+                Actions\DeleteAction::make(),
+            ])->label('Autres actions')->icon('heroicon-o-ellipsis-vertical'),
         ];
     }
 }

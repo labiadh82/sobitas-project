@@ -5,17 +5,25 @@ namespace App\Filament\Resources\FactureTvaResource\Pages;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\FactureTvaResource;
+use App\Filament\Widgets\DocumentTimelineWidget;
 use App\Models\DetailsFactureTva;
 use App\Models\Product;
 use App\Services\PaymentService;
 use Filament\Actions;
+use Filament\Actions\ActionGroup;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Schema;
 
 class EditFactureTva extends EditRecord
 {
     protected static string $resource = FactureTvaResource::class;
+
+    public function getHeaderWidgets(): array
+    {
+        return [DocumentTimelineWidget::class];
+    }
 
     public function getHeading(): string
     {
@@ -28,12 +36,14 @@ class EditFactureTva extends EditRecord
         $date = $this->record->created_at?->format('d/m/Y') ?? '—';
         $total = number_format((float) ($this->record->prix_ttc ?? 0), 3, ',', ' ') . ' TND';
         $parts = ["Client : {$client}", "Date : {$date}", "Total : {$total}"];
-        if ($this->record->facture_id) {
+        if (Schema::hasColumn('facture_tvas', 'facture_id') && $this->record->facture_id) {
             $parts[] = 'BL : #' . $this->record->facture?->numero;
         }
-        $paid = (float) $this->record->payments()->where('status', PaymentStatus::Succeeded)->sum('amount');
-        if ($paid > 0) {
-            $parts[] = 'Encaissé : ' . number_format($paid, 3, ',', ' ') . ' DT';
+        if (Schema::hasTable('payments')) {
+            $paid = (float) $this->record->payments()->where('status', PaymentStatus::Succeeded)->sum('amount');
+            if ($paid > 0) {
+                $parts[] = 'Encaissé : ' . number_format($paid, 3, ',', ' ') . ' DT';
+            }
         }
 
         return implode(' · ', $parts);
@@ -93,6 +103,7 @@ class EditFactureTva extends EditRecord
                 ->label('Enregistrer paiement')
                 ->icon('heroicon-o-banknotes')
                 ->color('success')
+                ->size(Actions\Action::SizeLarge)
                 ->form([
                     Forms\Components\TextInput::make('amount')
                         ->label('Montant (DT)')
@@ -132,20 +143,21 @@ class EditFactureTva extends EditRecord
             Actions\Action::make('createCreditNote')
                 ->label('Créer un avoir')
                 ->icon('heroicon-o-document-minus')
-                ->color('gray')
+                ->size(Actions\Action::SizeLarge)
                 ->url(fn () => CreditNoteResource::getUrl('create') . '?facture_tva_id=' . $this->record->id),
-            Actions\Action::make('print')
-                ->label('Imprimer')
-                ->icon('heroicon-o-printer')
-                ->color('gray')
-                ->modalHeading('Aperçu d\'impression')
-                ->modalContent(fn () => view('filament.components.print-modal', [
-                    'printUrl' => route('facture-tvas.print', ['factureTva' => $this->record->id]),
-                    'title' => 'Facture ' . $this->record->numero,
-                    'showStyleSwitcher' => true,
-                ]))
-                ->modalSubmitAction(false),
-            Actions\DeleteAction::make(),
+            ActionGroup::make([
+                Actions\Action::make('print')
+                    ->label('Imprimer')
+                    ->icon('heroicon-o-printer')
+                    ->modalHeading('Aperçu d\'impression')
+                    ->modalContent(fn () => view('filament.components.print-modal', [
+                        'printUrl' => route('facture-tvas.print', ['factureTva' => $this->record->id]),
+                        'title' => 'Facture ' . $this->record->numero,
+                        'showStyleSwitcher' => true,
+                    ]))
+                    ->modalSubmitAction(false),
+                Actions\DeleteAction::make(),
+            ])->label('Autres actions')->icon('heroicon-o-ellipsis-vertical'),
         ];
     }
 }

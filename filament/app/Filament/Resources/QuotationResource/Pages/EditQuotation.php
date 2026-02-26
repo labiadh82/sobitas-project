@@ -4,16 +4,23 @@ namespace App\Filament\Resources\QuotationResource\Pages;
 
 use App\Filament\Resources\CommandeResource;
 use App\Filament\Resources\QuotationResource;
+use App\Filament\Widgets\DocumentTimelineWidget;
 use App\Models\DetailsQuotation;
 use App\Models\Product;
 use App\Services\DocumentConversion\QuotationConversionService;
 use Filament\Actions;
+use Filament\Actions\ActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditQuotation extends EditRecord
 {
     protected static string $resource = QuotationResource::class;
+
+    public function getHeaderWidgets(): array
+    {
+        return [DocumentTimelineWidget::class];
+    }
 
     public function getHeading(): string
     {
@@ -72,19 +79,28 @@ class EditQuotation extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        $actions = [
+        $r = $this->record;
+        return [
             Actions\Action::make('convertToOrder')
                 ->label('Transformer en commande')
                 ->icon('heroicon-o-arrow-right-circle')
                 ->color('success')
+                ->size(Actions\Action::SizeLarge)
                 ->visible(fn () => ! $this->record->commandes()->exists())
-                ->requiresConfirmation()
-                ->modalHeading('Créer une commande à partir de ce devis')
-                ->modalSubmitActionLabel('Créer la commande')
+                ->modalHeading('Conversion : Devis → Commande')
+                ->modalDescription('Récapitulatif avant création de la commande.')
+                ->modalSubmitActionLabel('Confirmer la conversion')
+                ->modalContent(fn () => view('filament.components.convert-wizard-summary', [
+                    'sourceNumber' => $r->numero,
+                    'client' => $r->client?->name ?? '—',
+                    'date' => $r->date_quotation?->format('d/m/Y') ?? $r->created_at?->format('d/m/Y'),
+                    'itemsCount' => $r->details->count(),
+                    'totalTtc' => number_format((float)($r->prix_ttc ?? $r->prix_total ?? 0), 3, ',', ' ') . ' DT',
+                ]))
                 ->action(function (QuotationConversionService $service) {
                     $commande = $service->convertToOrder($this->record);
                     Notification::make()
-                        ->title('Commande créée')
+                        ->title('Conversion réussie')
                         ->body('Commande #' . $commande->numero . ' a été créée.')
                         ->success()
                         ->send();
@@ -93,17 +109,18 @@ class EditQuotation extends EditRecord
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
-                ->color('gray')
+                ->size(Actions\Action::SizeLarge)
                 ->modalHeading('Aperçu d\'impression')
                 ->modalContent(fn () => view('filament.components.print-modal', [
                     'printUrl' => route('quotations.print', ['quotation' => $this->record->id]),
                     'title' => 'Devis ' . $this->record->numero,
                 ]))
                 ->modalSubmitAction(false),
-            Actions\DeleteAction::make(),
+            ActionGroup::make([
+                Actions\Action::make('printDuplicate')->label('Dupliquer')->icon('heroicon-o-document-duplicate'),
+                Actions\DeleteAction::make(),
+            ])->label('Autres actions')->icon('heroicon-o-ellipsis-vertical'),
         ];
-
-        return array_values($actions);
     }
 
     private function getStatutLabel(?string $statut): string
