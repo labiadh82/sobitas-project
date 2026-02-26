@@ -130,6 +130,9 @@ class FactureTvaResource extends Resource
 
     public static function table(Table $table): Table
     {
+        // Root cause fix: facture_tvas.tva stores TVA AMOUNT (TND), not rate. The previous column
+        // displayed it with suffix '%', producing nonsense (e.g. 23978%). We now show TVA % (derived)
+        // and TVA (DT) (amount) separately.
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with('client:id,name'))
             ->columns([
@@ -148,7 +151,19 @@ class FactureTvaResource extends Resource
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('client.name')->label('Client')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('prix_ttc')->label('Total TTC')->money('TND')->sortable(),
-                Tables\Columns\TextColumn::make('tva')->label('TVA')->suffix('%'),
+                Tables\Columns\TextColumn::make('tva_rate_display')
+                    ->label('TVA %')
+                    ->getStateUsing(fn (FactureTva $record) => $record->getTvaRatePercent())
+                    ->formatStateUsing(fn ($state) => $state !== null ? (round($state) == $state ? (int) $state : $state) . '%' : '—')
+                    ->badge()
+                    ->color('gray'),
+                Tables\Columns\TextColumn::make('tva_amount_display')
+                    ->label('TVA (DT)')
+                    ->getStateUsing(fn (FactureTva $record) => $record->getTvaAmount())
+                    ->formatStateUsing(fn ($state) => number_format((float) $state, 3, '.', ' ') . ' DT')
+                    ->sortable(query: function ($query, string $direction) {
+                        return $query->orderBy('tva', $direction);
+                    }),
                 Tables\Columns\TextColumn::make('created_at')->label('Date')->dateTime('d/m/Y')->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
