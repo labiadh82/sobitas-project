@@ -20,7 +20,7 @@ class CreditNoteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-minus';
 
-    protected static ?string $navigationGroup = 'Facturation & Tickets';
+    protected static string | \UnitEnum | null $navigationGroup = 'Facturation & Tickets';
 
     protected static ?int $navigationSort = 5;
 
