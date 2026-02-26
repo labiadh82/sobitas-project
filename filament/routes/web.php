@@ -41,22 +41,13 @@ Route::middleware(['auth'])->group(function () {
         $details_ticket = \App\Models\DetailsTicket::where('ticket_id', $ticket->id)
             ->with('product:id,designation_fr')
             ->get();
-        $coordonnee = \App\Models\Coordinate::first();
+        $coordonnee = \App\Models\Coordinate::getCached();
 
         return view('print.ticket', [
             'ticket' => $ticket,
             'details_ticket' => $details_ticket,
             'coordonnee' => $coordonnee,
             'company' => $coordonnee,
-            'documentTitle' => 'Ticket',
-            'documentNumber' => $ticket->numero ?? '',
-            'documentDate' => $ticket->date_ticket ? \Carbon\Carbon::parse($ticket->date_ticket)->format('d/m/Y') : ($ticket->created_at?->format('d/m/Y') ?? ''),
-            'client' => $ticket->client,
-            'totals' => [
-                ['label' => 'Total TTC', 'value' => number_format((float)($ticket->prix_total ?? 0), 3, ',', ' ') . ' DT', 'class' => 'ttc'],
-            ],
-            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
-            'paymentTerms' => null,
         ]);
     })->name('tickets.print');
 
