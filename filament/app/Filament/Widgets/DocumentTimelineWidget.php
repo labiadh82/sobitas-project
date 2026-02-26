@@ -10,7 +10,7 @@ use Filament\Widgets\Widget;
  */
 class DocumentTimelineWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.document-timeline-widget';
+    protected string $view = 'filament.widgets.document-timeline-widget';
 
     protected int | string | array $columnSpan = 'full';
 
