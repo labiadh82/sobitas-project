@@ -1,5 +1,5 @@
 {{--
-  Print preview modal: centered document, clean toolbar (Imprimer, Télécharger PDF, Fermer).
+  Print preview modal: one centered column, paper-style preview, toolbar under it.
   Variables: $printUrl (required), $title (optional), $showStyleSwitcher (optional), $documentType ('ticket' | 'a4', default 'a4').
 --}}
 @php
@@ -11,8 +11,125 @@
     $documentType = $documentType ?? 'a4';
     $isTicket = $documentType === 'ticket';
 @endphp
+<style>
+/* Print preview: single centered column. Break out of any parent grid so we use full width. */
+.fi-print-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 0;
+    flex: 1;
+    grid-column: 1 / -1; /* span all columns if parent is grid */
+}
+.fi-print-preview__inner {
+    width: 100%;
+    max-width: {{ $isTicket ? '360px' : '900px' }};
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+.fi-print-preview__preview-area {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    background: #e5e7eb;
+}
+.fi-print-preview__paper {
+    flex-shrink: 0;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+.fi-print-preview__iframe {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    border: 0;
+    height: 75vh;
+    min-height: 420px;
+    background: #fff;
+}
+.fi-print-preview__toolbar {
+    flex-shrink: 0;
+    padding: 16px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+.fi-print-preview__toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.fi-print-preview__toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #6b7280;
+}
+.fi-print-preview__toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.fi-print-preview .fi-print-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.fi-print-preview .fi-print-btn--primary {
+    background: var(--primary-600, #2563eb);
+    color: #fff;
+}
+.fi-print-preview .fi-print-btn--primary:hover {
+    background: var(--primary-500, #3b82f6);
+}
+.fi-print-preview .fi-print-btn--secondary {
+    background: #fff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+.fi-print-preview .fi-print-btn--secondary:hover {
+    background: #f9fafb;
+}
+.fi-print-preview .fi-print-btn--ghost {
+    background: transparent;
+    color: #6b7280;
+}
+.fi-print-preview .fi-print-btn--ghost:hover {
+    background: #f3f4f6;
+}
+</style>
 <div
-    class="fi-print-preview flex flex-col min-h-0 flex-1"
+    class="fi-print-preview"
     x-data="{
         src: '{{ $urlClassicEmbed }}',
         get iframeEl() { return this.$refs.previewIframe; },
@@ -26,58 +143,42 @@
         }
     }"
 >
-    {{-- Preview area: centered, scrollable, paper-like --}}
-    <div class="flex-1 min-h-0 flex justify-center overflow-auto p-4 bg-gray-100 dark:bg-gray-800/50">
-        <div
-            class="fi-print-preview__paper shrink-0 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden {{ $isTicket ? 'max-w-[340px]' : 'max-w-[900px]' }} w-full"
-            style="{{ $isTicket ? 'width: 340px;' : 'width: 100%;' }}"
-        >
-            <iframe
-                x-ref="previewIframe"
-                :src="src"
-                class="block w-full border-0 bg-white dark:bg-gray-900"
-                style="height: 75vh; min-height: 420px;"
-                title="{{ $title ?? 'Aperçu d\'impression' }}"
-            ></iframe>
+    <div class="fi-print-preview__inner">
+        <div class="fi-print-preview__preview-area">
+            <div class="fi-print-preview__paper">
+                <iframe
+                    x-ref="previewIframe"
+                    :src="src"
+                    class="fi-print-preview__iframe"
+                    title="{{ $title ?? 'Aperçu d\'impression' }}"
+                ></iframe>
+            </div>
         </div>
-    </div>
 
-    {{-- Toolbar: sticky at bottom, clear actions --}}
-    <div class="fi-print-preview__toolbar shrink-0 flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        @if ($showStyleSwitcher)
-        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>Style :</span>
-            <button type="button" @click="src = '{{ $urlClassicEmbed }}'" class="underline hover:no-underline focus:outline-none">Classique</button>
-            <span aria-hidden="true">|</span>
-            <button type="button" @click="src = '{{ $urlModernEmbed }}'" class="underline hover:no-underline focus:outline-none">Moderne</button>
-        </div>
-        @else
-        <div aria-hidden="true"></div>
-        @endif
-        <div class="flex flex-wrap items-center gap-2">
-            <button
-                type="button"
-                @click="doPrint()"
-                class="fi-btn relative inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm outline-none transition min-h-[44px] bg-primary-600 text-white hover:bg-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-            >
-                <x-filament::icon icon="heroicon-o-printer" class="size-5" />
-                Imprimer
-            </button>
-            <button
-                type="button"
-                @click="doPrint()"
-                class="fi-btn relative inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 min-h-[44px]"
-            >
-                <x-filament::icon icon="heroicon-o-arrow-down-tray" class="size-5" />
-                Télécharger PDF
-            </button>
-            <button
-                type="button"
-                @click="doClose()"
-                class="fi-btn relative inline-flex items-center justify-center gap-2 rounded-xl border border-transparent px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 min-h-[44px]"
-            >
-                Fermer
-            </button>
+        <div class="fi-print-preview__toolbar">
+            <div class="fi-print-preview__toolbar-group">
+            @if ($showStyleSwitcher)
+            <div class="fi-print-preview__toolbar-left">
+                <span>Style :</span>
+                <button type="button" @click="src = '{{ $urlClassicEmbed }}'" style="background:none;border:none;cursor:pointer;text-decoration:underline;">Classique</button>
+                <span aria-hidden="true">|</span>
+                <button type="button" @click="src = '{{ $urlModernEmbed }}'" style="background:none;border:none;cursor:pointer;text-decoration:underline;">Moderne</button>
+            </div>
+            @endif
+            <div class="fi-print-preview__toolbar-actions">
+                <button type="button" @click="doPrint()" class="fi-print-btn fi-print-btn--primary">
+                    <x-filament::icon icon="heroicon-o-printer" class="size-5" />
+                    Imprimer
+                </button>
+                <button type="button" @click="doPrint()" class="fi-print-btn fi-print-btn--secondary">
+                    <x-filament::icon icon="heroicon-o-arrow-down-tray" class="size-5" />
+                    Télécharger PDF
+                </button>
+                <button type="button" @click="doClose()" class="fi-print-btn fi-print-btn--ghost">
+                    Fermer
+                </button>
+            </div>
+            </div>
         </div>
     </div>
 </div>
