@@ -15,7 +15,7 @@ class Product extends Model
         'designation_fr', 'slug', 'description_fr', 'cover', 'alt_cover', 'description_cover',
         'images', 'prix', 'prix_ht', 'promo', 'promo_ht', 'promo_expiration_date',
         'qte', 'low_stock_threshold', 'publier', 'rupture', 'new_product', 'best_seller', 'pack', 'note',
-        'meta_title', 'meta_description', 'sous_categorie_id', 'brand_id',
+        'meta_title', 'meta_description', 'sous_categorie_id', 'brand_id', 'code_product',
     ];
 
     protected $casts = [

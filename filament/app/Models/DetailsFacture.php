@@ -12,6 +12,7 @@ class DetailsFacture extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
+        'qte' => 'integer',
         'quantite' => 'integer',
         'prix_unitaire' => 'float',
     ];
@@ -30,6 +31,7 @@ class DetailsFacture extends Model
 
     public function getTotalAttribute(): float
     {
-        return $this->quantite * $this->prix_unitaire;
+        $qte = $this->qte ?? $this->quantite ?? 0;
+        return $qte * $this->prix_unitaire;
     }
 }
