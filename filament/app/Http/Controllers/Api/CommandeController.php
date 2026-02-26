@@ -42,6 +42,8 @@ class CommandeController extends Controller
 
         $commandeData = $request->commande;
 
+        Log::info('filament.api.add_commande.start', ['payload_keys' => array_keys($commandeData ?? [])]);
+
         $new_facture = DB::transaction(function () use ($commandeData, $request) {
             $new_facture = new Commande();
 
@@ -68,10 +70,16 @@ class CommandeController extends Controller
             } else {
                 $client = app(ClientService::class)->findOrCreateClientFromDeliveryInfo($commandeData);
                 if ($client) {
+                    Log::info('filament.api.add_commande.client_linked', ['client_id' => $client->id]);
                     $new_facture->user_id = $client->id;
                     if (Schema::hasColumn($new_facture->getTable(), 'client_id')) {
                         $new_facture->client_id = $client->id;
                     }
+                } else {
+                    Log::warning('filament.api.add_commande.no_client_created', [
+                        'has_phone' => ! empty($commandeData['livraison_phone'] ?? $commandeData['phone'] ?? null),
+                        'has_email' => ! empty($commandeData['livraison_email'] ?? $commandeData['email'] ?? null),
+                    ]);
                 }
             }
 

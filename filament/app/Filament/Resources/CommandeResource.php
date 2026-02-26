@@ -121,27 +121,64 @@ class CommandeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            // Select only displayed columns — commandes has 30+ columns, table shows 7
-            ->modifyQueryUsing(fn (Builder $query) => $query->select([
-                'id', 'numero', 'nom', 'prenom', 'phone', 'prix_ttc', 'etat', 'region', 'created_at',
-            ]))
+            // Select only displayed / frequently used columns to keep the query light
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with('client:id,name,phone_1')
+                ->select([
+                    'id',
+                    'numero',
+                    'nom',
+                    'prenom',
+                    'phone',
+                    'livraison_nom',
+                    'livraison_prenom',
+                    'livraison_phone',
+                    'prix_ttc',
+                    'etat',
+                    'region',
+                    'created_at',
+                    'user_id',
+                    'client_id',
+                ])
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('numero')
                     ->label('N°')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('client_name')
+                Tables\Columns\TextColumn::make('client_display')
                     ->label('Client')
-                    ->getStateUsing(fn (Commande $record): string => $record->full_name)
+                    ->getStateUsing(function (Commande $record): string {
+                        // Prefer linked client name, then commande client fields, then livraison fallback
+                        $name = $record->client?->full_name
+                            ?: trim(($record->nom ?? '') . ' ' . ($record->prenom ?? ''))
+                            ?: trim(($record->livraison_nom ?? '') . ' ' . ($record->livraison_prenom ?? ''));
+
+                        return $name !== '' ? $name : '—';
+                    })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $q) use ($search) {
                             $q->where('nom', 'like', "%{$search}%")
-                                ->orWhere('prenom', 'like', "%{$search}%");
+                                ->orWhere('prenom', 'like', "%{$search}%")
+                                ->orWhere('livraison_nom', 'like', "%{$search}%")
+                                ->orWhere('livraison_prenom', 'like', "%{$search}%");
                         });
                     }),
-                Tables\Columns\TextColumn::make('phone')
+                Tables\Columns\TextColumn::make('phone_display')
                     ->label('Tél.')
-                    ->searchable(),
+                    ->getStateUsing(function (Commande $record): string {
+                        $phone = $record->client?->phone_1
+                            ?: ($record->phone ?? '')
+                            ?: ($record->livraison_phone ?? '');
+
+                        return $phone !== '' ? $phone : '—';
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function (Builder $q) use ($search) {
+                            $q->where('phone', 'like', "%{$search}%")
+                                ->orWhere('livraison_phone', 'like', "%{$search}%");
+                        });
+                    }),
                 Tables\Columns\TextColumn::make('prix_ttc')
                     ->label('Total')
                     ->money('TND')
