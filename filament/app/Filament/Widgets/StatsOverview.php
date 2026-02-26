@@ -80,6 +80,9 @@ class StatsOverview extends BaseWidget
                 break;
         }
 
+        // Current period always ends at end of today
+        $end = $now->copy()->endOfDay();
+
         // ── Revenue (CA) — Policy 1: no double counting ──
         // Boutique: tickets (type=ticket_caisse). Delivery: commandes (etat=expidee). Standalone facture_tvas only.
         $revenueService = app(RevenueService::class);
