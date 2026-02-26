@@ -10,9 +10,21 @@ class Client extends Model
     protected $table = 'clients';
 
     protected $fillable = [
-        'name', 'email', 'phone_1', 'phone_2', 'adresse', 'region', 'ville', 'matricule',
-        'sms', 'password', 'source',
-        'loyalty_enabled', 'loyalty_percent', 'loyalty_note',
+        'name',
+        'email',
+        'phone_1',
+        'phone_2',
+        'adresse',
+        'region',
+        'ville',
+        'code_postale',
+        'matricule',
+        'sms',
+        'password',
+        'source',
+        'loyalty_enabled',
+        'loyalty_percent',
+        'loyalty_note',
     ];
 
     protected $hidden = [

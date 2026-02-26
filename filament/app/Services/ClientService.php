@@ -44,10 +44,14 @@ class ClientService
     public function findOrCreateClientFromDeliveryInfo(array $deliveryData): ?Client
     {
         $phone = $deliveryData['livraison_phone'] ?? $deliveryData['phone'] ?? null;
-        if ($phone === null || trim((string) $phone) === '') {
+        $email = $deliveryData['livraison_email'] ?? $deliveryData['email'] ?? null;
+
+        if (($phone === null || trim((string) $phone) === '') && ($email === null || trim((string) $email) === '')) {
+            // Require at least phone or email
             return null;
         }
-        $phone = trim((string) $phone);
+
+        $phone = $phone !== null ? trim((string) $phone) : null;
 
         $nom = $deliveryData['livraison_nom'] ?? $deliveryData['nom'] ?? null;
         $prenom = $deliveryData['livraison_prenom'] ?? $deliveryData['prenom'] ?? null;
@@ -57,22 +61,31 @@ class ClientService
         $adresse = trim(($adresse1 ?? '') . ($adresse2 ? ' ' . $adresse2 : ''));
         $region = $deliveryData['livraison_region'] ?? $deliveryData['region'] ?? null;
         $ville = $deliveryData['livraison_ville'] ?? $deliveryData['ville'] ?? null;
-        $email = $deliveryData['livraison_email'] ?? $deliveryData['email'] ?? null;
+        $codePostale = $deliveryData['livraison_code_postale'] ?? $deliveryData['code_postale'] ?? null;
 
         $normalized = $this->normalizePhone($phone);
-        if ($normalized === null) {
-            return null;
+
+        $client = null;
+
+        $isQuickOrderEmail = $email && preg_match('/^quickorder-[^@]+@protein\.tn$/i', (string) $email);
+
+        // 1) Real customer emails: try email first
+        if ($email && ! $isQuickOrderEmail) {
+            $client = Client::where('email', $email)->first();
         }
 
-        $client = Client::query()
-            ->whereNotNull('phone_1')
-            ->orWhereNotNull('phone_2')
-            ->get()
-            ->first(function (Client $c) use ($normalized) {
-                $n1 = $this->normalizePhone($c->phone_1);
-                $n2 = $this->normalizePhone($c->phone_2);
-                return $n1 === $normalized || $n2 === $normalized;
-            });
+        // 2) Then phone (primary key when available)
+        if (! $client && $normalized !== null) {
+            $client = Client::query()
+                ->whereNotNull('phone_1')
+                ->orWhereNotNull('phone_2')
+                ->get()
+                ->first(function (Client $c) use ($normalized) {
+                    $n1 = $this->normalizePhone($c->phone_1);
+                    $n2 = $this->normalizePhone($c->phone_2);
+                    return $n1 === $normalized || $n2 === $normalized;
+                });
+        }
 
         if ($client) {
             $dirty = false;
@@ -92,8 +105,12 @@ class ClientService
                 $client->ville = $ville;
                 $dirty = true;
             }
-            if (($client->email === null || trim($client->email) === '') && $email !== null && trim((string) $email) !== '') {
+            if (! $isQuickOrderEmail && ($client->email === null || trim($client->email) === '') && $email !== null && trim((string) $email) !== '') {
                 $client->email = $email;
+                $dirty = true;
+            }
+            if (property_exists($client, 'code_postale') && ($client->code_postale === null || trim((string) $client->code_postale) === '') && $codePostale !== null && trim((string) $codePostale) !== '') {
+                $client->code_postale = $codePostale;
                 $dirty = true;
             }
             if ($dirty) {
@@ -105,10 +122,15 @@ class ClientService
         $client = new Client();
         $client->name = $fullName !== '' ? $fullName : 'Client ' . substr($normalized, -4);
         $client->phone_1 = $phone;
-        $client->email = $email;
+        if (! $isQuickOrderEmail) {
+            $client->email = $email;
+        }
         $client->adresse = $adresse ?: null;
         $client->region = $region ?: null;
         $client->ville = $ville ?: null;
+        if ($codePostale !== null && trim((string) $codePostale) !== '') {
+            $client->code_postale = $codePostale;
+        }
         $client->source = self::SOURCE_ONLINE;
         $client->sms = false;
         $client->save();

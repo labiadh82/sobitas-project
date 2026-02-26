@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CommandeResource\Pages;
 
 use App\Filament\Resources\CommandeResource;
+use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\FactureResource;
 use App\Filament\Resources\TicketResource;
 use App\Filament\Widgets\DocumentTimelineWidget;
@@ -44,6 +45,12 @@ class EditCommande extends EditRecord
     {
         $r = $this->record;
         return [
+            Actions\Action::make('viewClient')
+                ->label('Voir client')
+                ->icon('heroicon-o-user')
+                ->visible(fn () => (bool) $this->record->user_id)
+                ->url(fn () => ClientResource::getUrl('edit', ['record' => $this->record->user_id]))
+                ->openUrlInNewTab(),
             Actions\Action::make('createBlTicket')
                 ->label('Créer Bon de livraison (Ticket)')
                 ->icon('heroicon-o-document-text')
