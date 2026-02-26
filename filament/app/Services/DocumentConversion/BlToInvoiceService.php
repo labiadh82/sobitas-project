@@ -58,7 +58,7 @@ class BlToInvoiceService
             }
             $invoice->tva = $totalTva;
             $invoice->prix_ttc = $totalHt + $totalTva - (float) $invoice->remise + (float) $invoice->timbre;
-            $invoice->prix_total = $invoice->prix_ttc;
+            // Do not set prix_total: facture_tvas table has no prix_total column (total is in prix_ttc)
             $invoice->save();
 
             foreach ($bl->details as $line) {
