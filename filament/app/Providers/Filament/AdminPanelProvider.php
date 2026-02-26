@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\HistoriqueClient;
 use App\Filament\Pages\LowStockProducts;
 use App\Filament\Pages\SendSms;
 use App\Filament\Pages\Stock\StockDashboard;
@@ -135,6 +136,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->pages([
                 Dashboard::class,
+                HistoriqueClient::class,
                 LowStockProducts::class,
                 SendSms::class,
                 MediaPage::class,
@@ -155,10 +157,8 @@ class AdminPanelProvider extends PanelProvider
                 OrderFunnelChart::class,
                 TopCategoriesChart::class,
                 GeographicChart::class,
-                DelayedOrdersTable::class,
                 LowStockTable::class,
                 TopCustomersTable::class,
-                ReturnsRefundsTable::class,
                 StatsOverview::class,
                 RevenueChart::class,
                 OrderStatusChart::class,

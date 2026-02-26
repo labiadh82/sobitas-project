@@ -35,6 +35,11 @@ class CommandeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'numero';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero'];
+    }
+
     public static function getNavigationBadge(): ?string
     {
         // Cache the badge count for 60 seconds to avoid query on every page load

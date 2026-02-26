@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RevenueChart extends ChartWidget
 {
@@ -39,10 +40,14 @@ class RevenueChart extends ChartWidget
 
         $ticketsData = $this->getDailyTotals('tickets', $startDate, "type = '" . Ticket::TYPE_TICKET_CAISSE . "'");
         $commandesData = $this->getDailyTotals('commandes', $startDate, "etat = 'expidee'");
-        $invoicesData = DB::table('facture_tvas')
-            ->whereNull('source_ticket_id')
-            ->whereNull('commande_id')
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $invoicesQuery = DB::table('facture_tvas')->whereBetween('created_at', [$startDate, $endDate]);
+        if (Schema::hasColumn('facture_tvas', 'source_ticket_id')) {
+            $invoicesQuery->whereNull('source_ticket_id');
+        }
+        if (Schema::hasColumn('facture_tvas', 'commande_id')) {
+            $invoicesQuery->whereNull('commande_id');
+        }
+        $invoicesData = $invoicesQuery
             ->select(DB::raw('DATE(created_at) as day'), DB::raw('ROUND(SUM(prix_ht), 2) as total'))
             ->groupBy(DB::raw('DATE(created_at)'))
             ->pluck('total', 'day')

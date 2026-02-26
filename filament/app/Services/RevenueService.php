@@ -7,6 +7,7 @@ use App\Models\FactureTva;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Revenue (Chiffre d'affaires) calculation — Policy 1: no double counting.
@@ -32,10 +33,7 @@ class RevenueService
             ->whereBetween('created_at', [$start, $end])
             ->sum('prix_ht');
 
-        $standaloneInvoices = FactureTva::whereBetween('created_at', [$start, $end])
-            ->whereNull('source_ticket_id')
-            ->whereNull('commande_id')
-            ->sum('prix_ht');
+        $standaloneInvoices = $this->queryStandaloneFactureTvas($start, $end)->sum('prix_ht');
 
         return (float) $tickets + (float) $commandes + (float) $standaloneInvoices;
     }
@@ -53,10 +51,7 @@ class RevenueService
             ->whereBetween('created_at', [$start, $end])
             ->sum('prix_ttc');
 
-        $standaloneInvoices = FactureTva::whereBetween('created_at', [$start, $end])
-            ->whereNull('source_ticket_id')
-            ->whereNull('commande_id')
-            ->sum('prix_ttc');
+        $standaloneInvoices = $this->queryStandaloneFactureTvas($start, $end)->sum('prix_ttc');
 
         return (float) $tickets + (float) $commandes + (float) $standaloneInvoices;
     }
@@ -108,10 +103,9 @@ class RevenueService
             ->pluck('total', 'day')
             ->toArray();
 
-        $invoices = DB::table('facture_tvas')
-            ->whereNull('source_ticket_id')
-            ->whereNull('commande_id')
-            ->whereBetween('created_at', [$start, $end])
+        $invoicesQuery = DB::table('facture_tvas')->whereBetween('created_at', [$start, $end]);
+        $this->applyStandaloneFactureTvasConditions($invoicesQuery);
+        $invoices = $invoicesQuery
             ->select(DB::raw('DATE(created_at) as day'), DB::raw('COALESCE(SUM(prix_ht), 0) as total'))
             ->groupBy(DB::raw('DATE(created_at)'))
             ->pluck('total', 'day')
@@ -153,10 +147,9 @@ class RevenueService
             ->pluck('total', 'day')
             ->toArray();
 
-        $invoices = DB::table('facture_tvas')
-            ->whereNull('source_ticket_id')
-            ->whereNull('commande_id')
-            ->whereBetween('created_at', [$start, $end])
+        $invoicesQuery = DB::table('facture_tvas')->whereBetween('created_at', [$start, $end]);
+        $this->applyStandaloneFactureTvasConditions($invoicesQuery);
+        $invoices = $invoicesQuery
             ->select(DB::raw('DATE(created_at) as day'), DB::raw('COALESCE(SUM(prix_ttc), 0) as total'))
             ->groupBy(DB::raw('DATE(created_at)'))
             ->pluck('total', 'day')
@@ -172,5 +165,35 @@ class RevenueService
         }
 
         return $result;
+    }
+
+    /**
+     * Query FactureTva for standalone only (no ticket/commande link).
+     * When source_ticket_id/commande_id columns are missing (migration not run), includes all facture_tvas.
+     */
+    private function queryStandaloneFactureTvas(Carbon $start, Carbon $end)
+    {
+        $query = FactureTva::whereBetween('created_at', [$start, $end]);
+        if (Schema::hasColumn('facture_tvas', 'source_ticket_id')) {
+            $query->whereNull('source_ticket_id');
+        }
+        if (Schema::hasColumn('facture_tvas', 'commande_id')) {
+            $query->whereNull('commande_id');
+        }
+        return $query;
+    }
+
+    /**
+     * Apply standalone-only conditions to a query builder (table or eloquent).
+     * Safe when columns do not exist (e.g. migration not run on production).
+     */
+    private function applyStandaloneFactureTvasConditions($query): void
+    {
+        if (Schema::hasColumn('facture_tvas', 'source_ticket_id')) {
+            $query->whereNull('source_ticket_id');
+        }
+        if (Schema::hasColumn('facture_tvas', 'commande_id')) {
+            $query->whereNull('commande_id');
+        }
     }
 }

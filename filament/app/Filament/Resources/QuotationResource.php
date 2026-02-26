@@ -34,6 +34,13 @@ class QuotationResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?string $recordTitleAttribute = 'numero';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero'];
+    }
+
     public static function form(Schema $schema): Schema
     {
         $coordinate = Coordinate::getCached();

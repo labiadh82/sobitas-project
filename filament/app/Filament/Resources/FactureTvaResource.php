@@ -27,7 +27,10 @@ class FactureTvaResource extends Resource
     protected static ?string $pluralModelLabel = 'Factures TVA';
     protected static ?string $recordTitleAttribute = 'numero';
 
-    protected static bool $isGloballySearchable = false;
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero'];
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -5,14 +5,12 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\DashboardAlertsWidget;
 use App\Filament\Widgets\DashboardHeaderWidget;
 use App\Filament\Widgets\QuickActionsWidget;
-use App\Filament\Widgets\DelayedOrdersTable;
 use App\Filament\Widgets\GeographicChart;
 use App\Filament\Widgets\LatestCommandes;
 use App\Filament\Widgets\LowStockTable;
 use App\Filament\Widgets\MarketplaceKpis;
 use App\Filament\Widgets\MonthlyRevenueComparison;
 use App\Filament\Widgets\MultiMetricChart;
-use App\Filament\Widgets\ReturnsRefundsTable;
 use App\Filament\Widgets\RevenueChart;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TopCategoriesChart;
@@ -29,6 +27,7 @@ class Dashboard extends BaseDashboard
     public function getHeaderWidgets(): array
     {
         return [
+            \App\Filament\Widgets\ClientHistoriqueSearchWidget::class,
             DashboardHeaderWidget::class,
         ];
     }
@@ -58,8 +57,6 @@ class Dashboard extends BaseDashboard
             TopProductsWidget::class,
             TopCustomersTable::class,
             LowStockTable::class,
-            DelayedOrdersTable::class,
-            ReturnsRefundsTable::class,
         ];
     }
 
