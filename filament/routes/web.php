@@ -11,24 +11,52 @@ Route::redirect('login-redirect', 'login')->name('login');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('factures/{facture}/print', function (Facture $facture) {
+        $facture->load('client');
         $details_facture = DetailsFacture::where('facture_id', $facture->id)
             ->with('product:id,designation_fr,cover')
             ->get();
+        $coordonnee = \App\Models\Coordinate::first();
 
-        return view('admin.imprimer_facture', [
+        return view('print.bon-de-livraison', [
             'facture' => $facture,
             'details_facture' => $details_facture,
+            'coordonnee' => $coordonnee,
+            'company' => $coordonnee,
+            'documentTitle' => 'Bon de Livraison',
+            'documentNumber' => $facture->numero,
+            'documentDate' => $facture->created_at?->format('d/m/Y'),
+            'client' => $facture->client,
+            'totals' => [
+                ['label' => 'Total HT', 'value' => number_format((float)($facture->prix_ht ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Remise', 'value' => number_format((float)($facture->remise ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Net à payer TTC', 'value' => number_format((float)($facture->prix_ttc ?? 0), 3, ',', ' ') . ' DT', 'class' => 'ttc'],
+            ],
+            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
+            'paymentTerms' => 'Paiement à la livraison ou par virement.',
         ]);
     })->name('factures.print');
 
     Route::get('tickets/{ticket}/print', function (\App\Models\Ticket $ticket) {
+        $ticket->load('client');
         $details_ticket = \App\Models\DetailsTicket::where('ticket_id', $ticket->id)
             ->with('product:id,designation_fr')
             ->get();
+        $coordonnee = \App\Models\Coordinate::first();
 
-        return view('admin.imprimer_ticket', [
+        return view('print.ticket', [
             'ticket' => $ticket,
             'details_ticket' => $details_ticket,
+            'coordonnee' => $coordonnee,
+            'company' => $coordonnee,
+            'documentTitle' => 'Ticket',
+            'documentNumber' => $ticket->numero ?? '',
+            'documentDate' => $ticket->date_ticket ? \Carbon\Carbon::parse($ticket->date_ticket)->format('d/m/Y') : ($ticket->created_at?->format('d/m/Y') ?? ''),
+            'client' => $ticket->client,
+            'totals' => [
+                ['label' => 'Total TTC', 'value' => number_format((float)($ticket->prix_total ?? 0), 3, ',', ' ') . ' DT', 'class' => 'ttc'],
+            ],
+            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
+            'paymentTerms' => null,
         ]);
     })->name('tickets.print');
 
@@ -38,8 +66,6 @@ Route::middleware(['auth'])->group(function () {
             ->with('product:id,designation_fr')
             ->get();
         $coordonnee = \App\Models\Coordinate::first();
-
-        // Row calculation: pu_ht, tva%, pu_ttc = pu_ht*(1+tva/100), total_ttc = pu_ttc*qte (no backend change)
         $defaultTva = (float) ($factureTva->tva ?? 19);
         $invoice_rows = $details_facture->map(function ($d, $i) use ($defaultTva) {
             $qte = (int) ($d->qte ?? $d->quantite ?? 0);
@@ -60,25 +86,79 @@ Route::middleware(['auth'])->group(function () {
             ];
         })->all();
 
-        $style = request()->query('style', 'classic');
-        $view = $style === 'modern' ? 'filament.invoice.modern' : 'filament.invoice.classic';
-
-        return view($view, [
+        return view('print.facture-tva', [
             'facture' => $factureTva,
             'details_facture' => $details_facture,
             'invoice_rows' => $invoice_rows,
             'coordonnee' => $coordonnee,
+            'company' => $coordonnee,
+            'documentTitle' => 'Facture TVA',
+            'documentNumber' => $factureTva->numero ?? '',
+            'documentDate' => $factureTva->date_facture ? \Carbon\Carbon::parse($factureTva->date_facture)->format('d/m/Y') : ($factureTva->created_at?->format('d/m/Y') ?? ''),
+            'client' => $factureTva->client,
+            'totals' => [
+                ['label' => 'Total HT', 'value' => number_format((float)($factureTva->prix_ht ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Remise', 'value' => number_format((float)($factureTva->remise ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'TVA', 'value' => number_format((float)($factureTva->tva ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Timbre', 'value' => number_format((float)($factureTva->timbre ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Total TTC', 'value' => number_format((float)($factureTva->prix_ttc ?? 0), 3, ',', ' ') . ' DT', 'class' => 'ttc'],
+            ],
+            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
+            'paymentTerms' => 'Paiement à réception. Virement bancaire ou espèces. Merci de préciser le n° de facture.',
         ]);
     })->name('facture-tvas.print');
 
+    Route::get('product-price-lists/{productPriceList}/print', function (\App\Models\ProductPriceList $productPriceList) {
+        $productPriceList->load(['details' => fn ($q) => $q->with('product:id,designation_fr')]);
+        $coordonnee = \App\Models\Coordinate::first();
+        $price_list_rows = $productPriceList->details->map(function ($d, $i) {
+            return [
+                'index' => $i + 1,
+                'designation' => $d->product->designation_fr ?? '—',
+                'prix_unitaire' => (float) ($d->prix_unitaire ?? 0),
+                'prix_gros' => (float) ($d->prix_gros ?? 0),
+            ];
+        })->all();
+
+        return view('print.liste-de-prix', [
+            'pricelist' => $productPriceList,
+            'company' => $coordonnee,
+            'documentTitle' => 'Liste de Prix',
+            'documentNumber' => $productPriceList->designation ?? ('LP-' . $productPriceList->id),
+            'documentDate' => $productPriceList->created_at?->format('d/m/Y'),
+            'client' => null,
+            'price_list_rows' => $price_list_rows,
+            'totals' => [
+                ['label' => 'Nombre de références', 'value' => (string) count($price_list_rows)],
+            ],
+            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
+            'paymentTerms' => 'Prix valables à la date d\'édition. Sous réserve de disponibilité.',
+        ]);
+    })->name('product-price-lists.print');
+
     Route::get('quotations/{quotation}/print', function (\App\Models\Quotation $quotation) {
+        $quotation->load('client');
         $details_facture = \App\Models\DetailsQuotation::where('quotation_id', $quotation->id)
             ->with('product:id,designation_fr')
             ->get();
+        $coordonnee = \App\Models\Coordinate::first();
 
-        return view('admin.imprimer_quotation', [
+        return view('print.devis', [
             'facture' => $quotation,
             'details_facture' => $details_facture,
+            'coordonnee' => $coordonnee,
+            'company' => $coordonnee,
+            'documentTitle' => 'Devis',
+            'documentNumber' => $quotation->numero ?? '',
+            'documentDate' => $quotation->date_quotation ? \Carbon\Carbon::parse($quotation->date_quotation)->format('d/m/Y') : ($quotation->created_at?->format('d/m/Y') ?? ''),
+            'client' => $quotation->client,
+            'totals' => [
+                ['label' => 'Total HT', 'value' => number_format((float)($quotation->prix_ht ?? $quotation->prix_total ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'TVA', 'value' => number_format((float)($quotation->tva ?? 0), 3, ',', ' ') . ' DT'],
+                ['label' => 'Net à payer TTC', 'value' => number_format((float)($quotation->prix_ttc ?? $quotation->prix_total ?? 0), 3, ',', ' ') . ' DT', 'class' => 'ttc'],
+            ],
+            'footerNote' => $coordonnee && !empty($coordonnee->note) ? $coordonnee->note : null,
+            'paymentTerms' => 'Valable 30 jours. Paiement à la commande ou à la livraison.',
         ]);
     })->name('quotations.print');
 });

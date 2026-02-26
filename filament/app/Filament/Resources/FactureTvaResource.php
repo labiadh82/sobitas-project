@@ -73,6 +73,10 @@ class FactureTvaResource extends Resource
                         ->content(fn () => new \Illuminate\Support\HtmlString(view('filament.components.barcode-scan')->render())),
                     Repeater::make('details')
                         ->label('')
+                        ->live()
+                        ->afterStateUpdated(function ($get, $set) {
+                            self::recalculateFactureTvaTotals($get, $set);
+                        })
                         ->schema([
                             Forms\Components\Select::make('produit_id')
                                 ->label('Produit')
@@ -86,10 +90,10 @@ class FactureTvaResource extends Resource
                                         $set('prix_unitaire', (float) ($product->prix ?? 0));
                                     }
                                 }),
-                            Forms\Components\TextInput::make('qte')->label('Qté')->numeric()->default(1)->minValue(1)->required(),
-                            Forms\Components\TextInput::make('prix_unitaire')->label('P.U')->numeric()->default(0)->prefix('DT')->required(),
+                            Forms\Components\TextInput::make('qte')->label('Qté')->numeric()->default(1)->minValue(1)->required()->live(debounce: 300),
+                            Forms\Components\TextInput::make('prix_unitaire')->label('P.U')->numeric()->default(0)->prefix('DT')->required()->live(debounce: 300),
                             Forms\Components\Placeholder::make('prix_ht_display')->label('P.T/HT')->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
-                            Forms\Components\TextInput::make('tva_pct')->label('TVA (%)')->numeric()->default($defaultTva)->suffix('%')->required(),
+                            Forms\Components\TextInput::make('tva_pct')->label('TVA (%)')->numeric()->default($defaultTva)->suffix('%')->required()->live(debounce: 300),
                             Forms\Components\Placeholder::make('prix_ttc_display')->label('TVA')->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire') * (float) ($get('tva_pct') ?? $defaultTva) / 100, 3, '.', ' ') . ' DT'),
                         ])
                         ->columns(5)
@@ -104,12 +108,16 @@ class FactureTvaResource extends Resource
                 Section::make('Totaux')
                     ->schema([
                         Forms\Components\TextInput::make('prix_ht')->label('Montant Total HT')->numeric()->prefix('DT')->disabled()->dehydrated(false)->default(0),
-                        Forms\Components\TextInput::make('remise')->label('Montant Remise')->numeric()->prefix('DT')->default(0)->live(),
-                        Forms\Components\TextInput::make('pourcentage_remise')->label('Poucentage Remise %')->numeric()->suffix('%')->default(0)->live(),
+                        Forms\Components\TextInput::make('remise')->label('Montant Remise')->numeric()->prefix('DT')->default(0)->live()->afterStateUpdated(function ($state, $get, $set) {
+                        self::recalculateFactureTvaTotals($get, $set);
+                    }),
+                        Forms\Components\TextInput::make('pourcentage_remise')->label('Pourcentage Remise %')->numeric()->suffix('%')->default(0)->live(),
                         Forms\Components\TextInput::make('prix_ht_apres_remise')->label('Montant HT après remise')->numeric()->prefix('DT')->disabled()->dehydrated(false)->default(0),
                         Forms\Components\TextInput::make('tva')->label('Montant Totale TVA')->numeric()->prefix('DT')->disabled()->dehydrated(false)->default(0),
                         Forms\Components\TextInput::make('prix_ttc')->label('Montant Totale TTC')->numeric()->prefix('DT')->disabled()->dehydrated(false)->default(0),
-                        Forms\Components\TextInput::make('timbre')->label('Timbre fiscal')->numeric()->prefix('DT')->default(0)->live(),
+                        Forms\Components\TextInput::make('timbre')->label('Timbre fiscal')->numeric()->prefix('DT')->default(0)->live()->afterStateUpdated(function ($state, $get, $set) {
+                        self::recalculateFactureTvaTotals($get, $set);
+                    }),
                         Forms\Components\TextInput::make('net_a_payer')->label('Net à payer')->numeric()->prefix('DT')->disabled()->dehydrated(false)->default(0),
                     ])
                     ->columns(1)
@@ -126,6 +134,18 @@ class FactureTvaResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('client:id,name'))
             ->columns([
                 Tables\Columns\TextColumn::make('numero')->label('N°')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Statut')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state?->label() ?? (is_string($state) ? $state : '—'))
+                    ->color(fn ($state) => match ($state?->value ?? '') {
+                        'issued' => 'info',
+                        'paid' => 'success',
+                        'partially_paid' => 'warning',
+                        'canceled' => 'danger',
+                        default => 'gray',
+                    })
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('client.name')->label('Client')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('prix_ttc')->label('Total TTC')->money('TND')->sortable(),
                 Tables\Columns\TextColumn::make('tva')->label('TVA')->suffix('%'),
@@ -149,6 +169,31 @@ class FactureTvaResource extends Resource
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([Actions\DeleteBulkAction::make()]);
+    }
+
+    public static function recalculateFactureTvaTotals($get, $set): void
+    {
+        $details = $get('details') ?? [];
+        $totalHt = 0.0;
+        $totalTva = 0.0;
+        foreach ($details as $d) {
+            if (!empty($d['produit_id'])) {
+                $ht = (float) ($d['qte'] ?? 0) * (float) ($d['prix_unitaire'] ?? 0);
+                $tvaPct = (float) ($d['tva_pct'] ?? 19);
+                $totalHt += $ht;
+                $totalTva += $ht * $tvaPct / 100;
+            }
+        }
+        $remise = (float) ($get('remise') ?? 0);
+        $htApresRemise = $totalHt - $remise;
+        $tvaApresRemise = $totalHt > 0 ? $totalTva - ($totalTva * $remise / $totalHt) : 0.0;
+        $timbre = (float) ($get('timbre') ?? 0);
+        $net = $htApresRemise + $tvaApresRemise + $timbre;
+        $set('prix_ht', $totalHt);
+        $set('prix_ht_apres_remise', $htApresRemise);
+        $set('tva', $tvaApresRemise);
+        $set('prix_ttc', $htApresRemise + $tvaApresRemise);
+        $set('net_a_payer', $net);
     }
 
     public static function getRelations(): array

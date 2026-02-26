@@ -81,7 +81,21 @@ class CommandeController extends Controller
 
             $new_facture->save();
 
-            // Add order items
+            // Validate stock before adding items
+            foreach ($request->panier as $panier) {
+                $product = Product::find($panier['produit_id']);
+                $qte = (int) $panier['quantite'];
+                if ($product && $product->qte < $qte) {
+                    throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                        response()->json([
+                            'message' => 'Stock insuffisant pour "' . ($product->designation_fr ?? 'produit') . '" (disponible: ' . $product->qte . ', demandé: ' . $qte . ').',
+                            'alert-type' => 'error',
+                        ], 422)
+                    );
+                }
+            }
+
+            // Add order items and decrement stock
             $all_price_ht = 0;
 
             foreach ($request->panier as $panier) {
@@ -97,6 +111,8 @@ class CommandeController extends Controller
                 $all_price_ht += $the_price_ht;
 
                 $new_details->save();
+
+                Product::where('id', $panier['produit_id'])->decrement('qte', (int) $panier['quantite']);
             }
 
             // Calculate totals

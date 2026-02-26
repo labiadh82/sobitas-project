@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\FactureResource\Pages;
 
 use App\Filament\Resources\FactureResource;
+use App\Filament\Resources\FactureTvaResource;
 use App\Models\DetailsFacture;
 use App\Models\Product;
+use App\Services\DocumentConversion\BlToInvoiceService;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditFacture extends EditRecord
@@ -22,8 +25,15 @@ class EditFacture extends EditRecord
         $client = $this->record->client?->name ?? '—';
         $date = $this->record->created_at?->format('d/m/Y') ?? '—';
         $total = number_format((float) ($this->record->prix_ttc ?? 0), 2, ',', ' ') . ' TND';
+        $parts = ["Client : {$client}", "Date : {$date}", "Total : {$total}"];
+        if ($this->record->commande_id) {
+            $parts[] = 'Commande : #' . $this->record->commande?->numero;
+        }
+        if ($this->record->factureTvas()->exists()) {
+            $parts[] = 'Facture TVA : #' . $this->record->factureTvas->first()?->numero;
+        }
 
-        return "Client : {$client} · Date : {$date} · Total : {$total}";
+        return implode(' · ', $parts);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -68,6 +78,23 @@ class EditFacture extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('convertToInvoice')
+                ->label('Transformer en facture TVA')
+                ->icon('heroicon-o-document-duplicate')
+                ->color('success')
+                ->visible(fn () => ! $this->record->factureTvas()->exists())
+                ->requiresConfirmation()
+                ->modalHeading('Créer une facture TVA à partir de ce BL')
+                ->modalSubmitActionLabel('Créer la facture')
+                ->action(function (BlToInvoiceService $service) {
+                    $invoice = $service->createInvoiceFromBl($this->record);
+                    Notification::make()
+                        ->title('Facture TVA créée')
+                        ->body('Facture #' . $invoice->numero . ' a été créée.')
+                        ->success()
+                        ->send();
+                    $this->redirect(FactureTvaResource::getUrl('edit', ['record' => $invoice]));
+                }),
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')

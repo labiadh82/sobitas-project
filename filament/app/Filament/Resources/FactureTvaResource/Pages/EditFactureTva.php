@@ -2,10 +2,15 @@
 
 namespace App\Filament\Resources\FactureTvaResource\Pages;
 
+use App\Enums\PaymentStatus;
+use App\Filament\Resources\CreditNoteResource;
 use App\Filament\Resources\FactureTvaResource;
 use App\Models\DetailsFactureTva;
 use App\Models\Product;
+use App\Services\PaymentService;
 use Filament\Actions;
+use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditFactureTva extends EditRecord
@@ -22,8 +27,16 @@ class EditFactureTva extends EditRecord
         $client = $this->record->client?->name ?? '—';
         $date = $this->record->created_at?->format('d/m/Y') ?? '—';
         $total = number_format((float) ($this->record->prix_ttc ?? 0), 3, ',', ' ') . ' TND';
+        $parts = ["Client : {$client}", "Date : {$date}", "Total : {$total}"];
+        if ($this->record->facture_id) {
+            $parts[] = 'BL : #' . $this->record->facture?->numero;
+        }
+        $paid = (float) $this->record->payments()->where('status', PaymentStatus::Succeeded)->sum('amount');
+        if ($paid > 0) {
+            $parts[] = 'Encaissé : ' . number_format($paid, 3, ',', ' ') . ' DT';
+        }
 
-        return "Client : {$client} · Date : {$date} · Total : {$total}";
+        return implode(' · ', $parts);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -76,6 +89,51 @@ class EditFactureTva extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('recordPayment')
+                ->label('Enregistrer paiement')
+                ->icon('heroicon-o-banknotes')
+                ->color('success')
+                ->form([
+                    Forms\Components\TextInput::make('amount')
+                        ->label('Montant (DT)')
+                        ->numeric()
+                        ->required()
+                        ->minValue(0.001)
+                        ->default(fn () => (float) ($this->record->prix_ttc ?? $this->record->prix_total ?? 0)),
+                    Forms\Components\Select::make('method')
+                        ->label('Méthode')
+                        ->options([
+                            'COD' => 'Espèces / COD',
+                            'Stripe' => 'Stripe',
+                            'PayPal' => 'PayPal',
+                            'Virement' => 'Virement',
+                            'Chèque' => 'Chèque',
+                        ])
+                        ->default('COD')
+                        ->required(),
+                    Forms\Components\TextInput::make('provider_ref')
+                        ->label('Référence (optionnel)')
+                        ->placeholder('ID transaction'),
+                    Forms\Components\DateTimePicker::make('paid_at')
+                        ->label('Date de paiement')
+                        ->default(now()),
+                ])
+                ->action(function (array $data, PaymentService $service) {
+                    $service->recordPayment(
+                        $this->record,
+                        (float) $data['amount'],
+                        $data['method'],
+                        $data['provider_ref'] ?? null,
+                        $data['paid_at'] ?? null
+                    );
+                    Notification::make()->title('Paiement enregistré')->success()->send();
+                    $this->refreshFormData(['status']);
+                }),
+            Actions\Action::make('createCreditNote')
+                ->label('Créer un avoir')
+                ->icon('heroicon-o-document-minus')
+                ->color('gray')
+                ->url(fn () => CreditNoteResource::getUrl('create') . '?facture_tva_id=' . $this->record->id),
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')

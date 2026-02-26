@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\QuotationResource\Pages;
 
+use App\Filament\Resources\CommandeResource;
 use App\Filament\Resources\QuotationResource;
 use App\Models\DetailsQuotation;
 use App\Models\Product;
+use App\Services\DocumentConversion\QuotationConversionService;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditQuotation extends EditRecord
@@ -69,7 +72,24 @@ class EditQuotation extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
+        $actions = [
+            Actions\Action::make('convertToOrder')
+                ->label('Transformer en commande')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->color('success')
+                ->visible(fn () => ! $this->record->commandes()->exists())
+                ->requiresConfirmation()
+                ->modalHeading('Créer une commande à partir de ce devis')
+                ->modalSubmitActionLabel('Créer la commande')
+                ->action(function (QuotationConversionService $service) {
+                    $commande = $service->convertToOrder($this->record);
+                    Notification::make()
+                        ->title('Commande créée')
+                        ->body('Commande #' . $commande->numero . ' a été créée.')
+                        ->success()
+                        ->send();
+                    $this->redirect(CommandeResource::getUrl('edit', ['record' => $commande]));
+                }),
             Actions\Action::make('print')
                 ->label('Imprimer')
                 ->icon('heroicon-o-printer')
@@ -82,6 +102,8 @@ class EditQuotation extends EditRecord
                 ->modalSubmitAction(false),
             Actions\DeleteAction::make(),
         ];
+
+        return array_values($actions);
     }
 
     private function getStatutLabel(?string $statut): string

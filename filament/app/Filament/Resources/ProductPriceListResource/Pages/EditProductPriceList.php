@@ -13,6 +13,13 @@ class EditProductPriceList extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('print')
+                ->label('Imprimer')
+                ->icon('heroicon-o-printer')
+                ->color('primary')
+                ->modalContent(fn () => view('filament.components.print-modal', [
+                    'printUrl' => route('product-price-lists.print', ['productPriceList' => $this->record->id]),
+                ])),
             Actions\DeleteAction::make(),
         ];
     }

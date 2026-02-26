@@ -10,10 +10,12 @@ class Commande extends Model
 {
     protected $table = 'commandes';
 
+    public const STATUS_NEW = 'nouvelle_commande';
+
     protected $fillable = [
         'numero', 'nom', 'prenom', 'email', 'phone', 'pays', 'region', 'ville',
         'code_postale', 'adresse1', 'adresse2', 'etat', 'prix_ht', 'prix_ttc',
-        'frais_livraison', 'remise', 'note', 'user_id', 'livraison',
+        'frais_livraison', 'remise', 'note', 'user_id', 'quotation_id', 'livraison',
         'livraison_nom', 'livraison_prenom', 'livraison_email', 'livraison_phone',
         'livraison_region', 'livraison_ville', 'livraison_code_postale',
         'livraison_adresse1', 'livraison_adresse2', 'sms_sent',
@@ -81,9 +83,24 @@ class Commande extends Model
         return $this->belongsTo(Client::class, 'user_id');
     }
 
+    public function quotation(): BelongsTo
+    {
+        return $this->belongsTo(Quotation::class, 'quotation_id');
+    }
+
     public function details(): HasMany
     {
         return $this->hasMany(CommandeDetail::class, 'commande_id');
+    }
+
+    public function factures(): HasMany
+    {
+        return $this->hasMany(Facture::class, 'commande_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'commande_id');
     }
 
     // ── Scopes ──────────────────────────────────────────

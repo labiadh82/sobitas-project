@@ -88,6 +88,19 @@ class FactureResource extends Resource
                         ->content(fn () => new \Illuminate\Support\HtmlString(view('filament.components.barcode-scan')->render())),
                     Repeater::make('details')
                         ->label('')
+                        ->live()
+                        ->afterStateUpdated(function ($get, $set) {
+                            $details = $get('details') ?? [];
+                            $total = 0.0;
+                            foreach ($details as $d) {
+                                if (!empty($d['produit_id'])) {
+                                    $total += (float) ($d['qte'] ?? 0) * (float) ($d['prix_unitaire'] ?? 0);
+                                }
+                            }
+                            $remise = (float) ($get('remise') ?? 0);
+                            $set('prix_ht', $total);
+                            $set('prix_ttc', $total - $remise);
+                        })
                         ->schema([
                             Forms\Components\Select::make('produit_id')
                                 ->label('Produit')
@@ -106,13 +119,15 @@ class FactureResource extends Resource
                                 ->numeric()
                                 ->default(1)
                                 ->minValue(1)
-                                ->required(),
+                                ->required()
+                                ->live(debounce: 300),
                             Forms\Components\TextInput::make('prix_unitaire')
                                 ->label('P.U')
                                 ->numeric()
                                 ->default(0)
                                 ->prefix('DT')
-                                ->required(),
+                                ->required()
+                                ->live(debounce: 300),
                             Forms\Components\Placeholder::make('prix_total_display')
                                 ->label('P.T')
                                 ->content(fn ($get) => number_format((float) $get('qte') * (float) $get('prix_unitaire'), 3, '.', ' ') . ' DT'),
@@ -141,7 +156,18 @@ class FactureResource extends Resource
                             ->numeric()
                             ->prefix('DT')
                             ->default(0)
-                            ->live(),
+                            ->live()
+                            ->afterStateUpdated(function ($state, $get, $set) {
+                                $details = $get('details') ?? [];
+                                $total = 0.0;
+                                foreach ($details as $d) {
+                                    if (!empty($d['produit_id'])) {
+                                        $total += (float) ($d['qte'] ?? 0) * (float) ($d['prix_unitaire'] ?? 0);
+                                    }
+                                }
+                                $set('prix_ht', $total);
+                                $set('prix_ttc', $total - (float) ($state ?? 0));
+                            }),
                         Forms\Components\TextInput::make('pourcentage_remise')
                             ->label('Pourcentage Remise %')
                             ->numeric()
@@ -175,6 +201,16 @@ class FactureResource extends Resource
                     ->label('N°')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Statut')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state?->label() ?? (is_string($state) ? $state : '—'))
+                    ->color(fn ($state) => match ($state?->value ?? '') {
+                        'issued' => 'success',
+                        'delivered' => 'info',
+                        default => 'gray',
+                    })
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client')
                     ->searchable()

@@ -65,6 +65,11 @@ class ProductPriceListResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Actions\Action::make('print')
+                    ->label('Imprimer')
+                    ->icon('heroicon-o-printer')
+                    ->url(fn (ProductPriceList $record): string => route('product-price-lists.print', ['productPriceList' => $record->id]))
+                    ->openUrlInNewTab(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])
