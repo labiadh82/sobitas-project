@@ -79,7 +79,9 @@ class FactureResource extends Resource
 
             Section::make('Produits')
                 ->schema([
-                    Forms\Components\View::make('filament.components.barcode-scan'),
+                    Forms\Components\Placeholder::make('barcode_scan')
+                        ->label('Scanner code à barre')
+                        ->content(fn () => view('filament.components.barcode-scan')->render()),
                     Repeater::make('details')
                         ->label('')
                         ->schema([
