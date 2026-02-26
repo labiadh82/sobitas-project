@@ -18,9 +18,9 @@ class CreditNoteResource extends Resource
 {
     protected static ?string $model = CreditNote::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-minus';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-minus';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Facturation & Tickets';
+    protected static string | \BackedEnum | null $navigationGroup = 'Facturation & Tickets';
 
     protected static ?int $navigationSort = 5;
 
