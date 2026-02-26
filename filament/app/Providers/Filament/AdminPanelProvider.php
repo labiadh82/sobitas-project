@@ -48,6 +48,7 @@ use App\Filament\Widgets\OrderStatusChart;
 use App\Filament\Widgets\RevenueChart;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TopProductsWidget;
+use App\Filament\Widgets\ClientHistoriqueSearchWidget;
 use App\Filament\Widgets\DashboardHeaderWidget;
 use App\Filament\Widgets\DashboardAlertsWidget;
 use App\Filament\Widgets\MarketplaceKpis;
@@ -150,6 +151,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
                 AccountWidget::class,
+                ClientHistoriqueSearchWidget::class,
                 DashboardHeaderWidget::class,
                 DashboardAlertsWidget::class,
                 MarketplaceKpis::class,
@@ -225,7 +227,8 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
             ])
-            // Only keep global search for essential resources
+            // Global search: real-time feel with 300ms debounce; keybindings
+            ->globalSearchDebounce(300)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => null);
     }
