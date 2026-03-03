@@ -16,7 +16,7 @@ class StoreReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'required|integer|exists:produits,id',
+            'product_id' => 'required|integer|exists:products,id',
             'stars' => 'nullable|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
         ];
