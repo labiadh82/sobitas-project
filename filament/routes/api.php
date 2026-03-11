@@ -57,36 +57,22 @@ Route::middleware(['cache.api:60', 'cache.headers.api:60'])->group(function () {
     Route::get('/all_articles', [ApisController::class, 'allArticles']);
 });
 
-// ── FAST ROUTE (Minimal middleware) ─────────────────────────────
-// Isolated route to test performance without middleware overhead
-// Used for benchmarking to identify middleware bottlenecks
-// Only keeps: CacheApiResponse (essential for performance) + SubstituteBindings (required for routing)
-Route::get('/all_products_fast', [ApisController::class, 'allProducts'])
-    ->withoutMiddleware([
-        'throttle:api',
-        \App\Http\Middleware\DisableDebugbarForApi::class,
-        \App\Http\Middleware\RequestTimeline::class,
-        \App\Http\Middleware\PerformanceProfiler::class,
-    ])
-    ->middleware([
-        'cache.api:60',
-        'cache.headers.api:60',
-        \Illuminate\Routing\Middleware\SubstituteBindings::class,
-    ]);
+// ── FAST ROUTE (Minimal middleware) — SUPPRIMÉE pour raison de sécurité ─────
+// Cette route contournait throttle:api et exposait /all_products sans limitation.
+// Voir audit sécurité v2 (rapport_audit_v2_sobitas.pdf, finding #10).
 
 // ── Uncached Public Routes (dynamic/write operations) ─
 Route::get('/searchProduct/{text}', [ApisController::class, 'searchProduct']);
 Route::get('/searchProductBySubCategoryText/{slug}/{text}', [ApisController::class, 'searchProductBySubCategoryText']);
-Route::get('/commande/{id}', [CommandeController::class, 'details']);
 
 Route::post('/add_commande', [CommandeController::class, 'storeCommandeApi']);
-Route::post('/newsletter', [ApisController::class, 'newsLetter']);
-Route::post('/contact', [ApisController::class, 'sendContact']);
-Route::post('/send_mail', [ApisController::class, 'send_email']);
+Route::post('/newsletter', [ApisController::class, 'newsLetter'])->middleware('throttle:3,1');
+Route::post('/contact', [ApisController::class, 'sendContact'])->middleware('throttle:3,1');
+Route::post('/send_mail', [ApisController::class, 'send_email'])->middleware('throttle:3,1');
 
-// Auth
-Route::post('/login', [ClientController::class, 'login']);
-Route::post('/register', [ClientController::class, 'register']);
+// Auth — strict rate limits to prevent brute-force
+Route::post('/login', [ClientController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/register', [ClientController::class, 'register'])->middleware('throttle:10,1');
 
 // ── Authenticated Routes ──────────────────────────────
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -95,6 +81,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profil', [ClientController::class, 'profil']);
+    Route::get('/commande/{id}', [CommandeController::class, 'details']); // moved here — IDOR fix
     Route::get('/client_commandes', [ClientController::class, 'client_commandes']);
     Route::post('/update_profile', [ClientController::class, 'update_profile']);
     Route::post('/detail_commande/{id}', [ClientController::class, 'detail_commande']);

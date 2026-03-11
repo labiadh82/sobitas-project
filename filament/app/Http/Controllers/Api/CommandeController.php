@@ -63,9 +63,21 @@ class CommandeController extends Controller
             $new_facture->note = $commandeData['note'] ?? null;
 
             if (! empty($commandeData['user_id'])) {
-                $new_facture->user_id = $commandeData['user_id'];
-                if (Schema::hasColumn($new_facture->getTable(), 'client_id')) {
-                    $new_facture->client_id = $commandeData['user_id'];
+                // SECURITY FIX: Never trust user_id supplied by the client payload.
+                // Authenticated requests always use the verified Auth::id().
+                // Guest orders fall through to ClientService derivation below.
+                if (\Illuminate\Support\Facades\Auth::check()) {
+                    $new_facture->user_id = \Illuminate\Support\Facades\Auth::id();
+                } else {
+                    // Guest order — derive client from delivery info, ignore client-supplied user_id
+                    $client = app(ClientService::class)->findOrCreateClientFromDeliveryInfo($commandeData);
+                    if ($client) {
+                        Log::info('filament.api.add_commande.client_linked', ['client_id' => $client->id]);
+                        $new_facture->user_id = $client->id;
+                        if (Schema::hasColumn($new_facture->getTable(), 'client_id')) {
+                            $new_facture->client_id = $client->id;
+                        }
+                    }
                 }
             } else {
                 $client = app(ClientService::class)->findOrCreateClientFromDeliveryInfo($commandeData);

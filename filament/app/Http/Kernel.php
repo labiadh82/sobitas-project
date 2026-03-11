@@ -64,7 +64,6 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\DisableDebugbarForApi::class, // CRITICAL: Disable debugbar for API (performance)
             \App\Http\Middleware\RequestTimeline::class, // Detailed timing profiler
             'throttle:api',
-            \App\Http\Middleware\PerformanceProfiler::class, // TEMPORARY: Remove after diagnostics
             SubstituteBindings::class,
             // NOTE: Compression removed - use Nginx gzip instead (faster)
         ],
