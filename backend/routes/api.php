@@ -61,16 +61,16 @@ Route::get('/redirections', [ApisController::class, 'redirections']);
 Route::get('/seo_page/{name}', [ApisController::class, 'seoPage']);
 
 // Forms
-Route::post('/newsletter', [ApisController::class, 'newsLetter']);
-Route::post('/contact', [ApisController::class, 'sendContact']);
+Route::post('/newsletter', [ApisController::class, 'newsLetter'])->middleware('throttle:3,1');
+Route::post('/contact', [ApisController::class, 'sendContact'])->middleware('throttle:3,1');
 
 // Orders (public)
 Route::post('/add_commande', [AdminCommandeController::class, 'storeCommandeApi']);
 Route::get('/commande/{id}', [AdminCommandeController::class, 'details']);
 
 // Authentication
-Route::post('/login', [ClientController::class, 'login']);
-Route::post('/register', [ClientController::class, 'register']);
+Route::post('/login', [ClientController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/register', [ClientController::class, 'register'])->middleware('throttle:10,1');
 
 // ─── Authenticated Routes ────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {

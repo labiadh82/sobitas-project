@@ -3,34 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use App\Client;
+use App\Http\Requests\ContactRequest;
+use App\Http\Requests\NewsletterRequest;
+use App\Http\Requests\StoreReviewRequest;
 use App\Mail\SoumissionMail;
-use App\Categ;
-use App\Slide;
-use App\Coordinate;
-use App\Product;
-use App\SousCategory;
-use App\Brand;
-use App\Article;
-use App\Aroma;
-use App\Tag;
+use App\Models\Category as Categ;
+use App\Models\Slide;
+use App\Models\Coordinate;
+use App\Models\Product;
+use App\Models\SousCategory;
+use App\Models\Brand;
+use App\Models\Article;
+use App\Models\Aroma;
+use App\Models\Tag;
 use Carbon\Carbon;
-use App\Annonce;
-use App\Service;
-use App\Contact;
-use App\Newsletter;
-use TCG\Voyager\Models\Page;
+use App\Models\Annonce;
+use App\Models\Service;
+use App\Models\Contact;
+use App\Models\Newsletter;
+use App\Models\Page;
 use App\Services\SmsService;
-use App\Faq;
+use App\Models\Faq;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderShipped;
-use App\Commande;
-use App\CommandeDetail;
-use App\Redirection;
-use App\Review;
-use App\SeoPage;
-use Auth;
+use App\Models\Commande;
+use App\Models\CommandeDetail;
+use App\Models\Redirection;
+use App\Models\Review;
+use App\Models\SeoPage;
+use Illuminate\Support\Facades\Auth;
 
 class ApisController extends Controller
 {
@@ -241,11 +241,12 @@ class ApisController extends Controller
 
     public function productsByBrandId($brand_id)
     {
-        $brand = Brand::find($brand_id);
-        $categories = Categ::all();
+        $brand = Brand::select('id', 'logo', 'designation_fr', 'alt_cover')->find($brand_id);
+        $categories = Categ::select('id', 'cover', 'slug', 'designation_fr')->get();
         $products = Product::where('brand_id', $brand_id)->where('publier', 1)
+            ->select(self::PRODUCT_LISTING)
             ->with('aromes')->with('tags')->get();
-        $brands = Brand::all();
+        $brands = Brand::select('id', 'logo', 'designation_fr', 'alt_cover')->get();
         return ['categories' => $categories, 'products' => $products, 'brands' => $brands, 'brand' => $brand];
     }
 
@@ -305,7 +306,10 @@ class ApisController extends Controller
 
     public function allArticles()
     {
-        return Article::where('publier', 1)->get();
+        return Article::where('publier', 1)
+            ->select('id', 'slug', 'designation_fr', 'cover', 'created_at')
+            ->latest('created_at')
+            ->get();
     }
 
     public function articleDetails($slug)
@@ -355,24 +359,21 @@ class ApisController extends Controller
         return Annonce::first();
     }
 
-    public function newsLetter(Request $request)
+    public function newsLetter(NewsletterRequest $request)
     {
-        $exist = Newsletter::where('email', $request->input('email'))->get();
-        if ($exist->count() > 0) {
-            return response()->json(['error' => 'Vous êtes déjà inscrit!'], 406);
-        }
         $n = new Newsletter();
-        $n->email = $request->input('email');
+        $n->email = $request->validated('email');
         $n->save();
         return ['success' => 'Merci de vous inscrire!'];
     }
 
-    public function sendContact(Request $request)
+    public function sendContact(ContactRequest $request)
     {
+        $validated = $request->validated();
         $new_contact = new Contact();
-        $new_contact->name = $request->name;
-        $new_contact->email = $request->email;
-        $new_contact->message = $request->message;
+        $new_contact->name = $validated['name'];
+        $new_contact->email = $validated['email'];
+        $new_contact->message = $validated['message'];
         $new_contact->save();
         return ['success' => 'Votre message envoyer avec succès'];
     }
@@ -444,13 +445,14 @@ class ApisController extends Controller
         return Redirection::all();
     }
 
-    public function add_review(Request $request)
+    public function add_review(StoreReviewRequest $request)
     {
+        $validated = $request->validated();
         $review = new Review();
         $review->user_id = Auth::user()->id;
-        $review->product_id = $request->product_id ?? null;
-        $review->stars = $request->stars ?? 5;
-        $review->comment = $request->comment ?? null;
+        $review->product_id = $validated['product_id'];
+        $review->stars = $validated['stars'] ?? 5;
+        $review->comment = $validated['comment'] ?? null;
         $review->publier = ($review->stars >= 4) ? 1 : 0;
         $review->save();
         return $review;

@@ -29,10 +29,16 @@ Route::get('/', function () {
     return redirect('/admin');
 });
 
+// Named login route required by the Authenticate middleware redirect.
+// Returns 401 JSON since this app uses API-first auth (no traditional login form).
+Route::get('/login', function () {
+    return response()->json(['message' => 'Authentication required. Please log in.'], 401);
+})->name('login');
+
 // ─── Admin Routes ────────────────────────────────────────────────────
 // These routes will be replaced by Filament once installed.
 // For now, they maintain backward compatibility with existing views.
-Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

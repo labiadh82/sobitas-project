@@ -45,7 +45,7 @@ class ClientController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
-            'role_id' => $validated['role_id'],
+            'role_id' => 2, // Always register as regular customer; never allow self-assigned admin roles
             'phone' => $validated['phone'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -63,19 +63,25 @@ class ClientController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string',
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'password' => 'nullable|string|min:8|confirmed', // requires password_confirmation when changing password
         ]);
 
         /** @var User $user */
         $user = User::findOrFail(Auth::id());
-        $user->update([
+
+        $updateData = [
             'name' => $request->input('name'),
             'phone' => $request->input('phone'),
             'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-        ]);
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->input('password'));
+        }
+
+        $user->update($updateData);
 
         return $user;
     }
@@ -97,11 +103,13 @@ class ClientController extends Controller
     }
 
     /**
-     * Get commande details.
+     * Get commande details (authenticated user's own order only).
      */
     public function detail_commande(int $id): array
     {
-        $commande = Commande::findOrFail($id);
+        $commande = Commande::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
         $details = CommandeDetail::where('commande_id', $commande->id)->get();
 
         return ['commande' => $commande, 'details' => $details];

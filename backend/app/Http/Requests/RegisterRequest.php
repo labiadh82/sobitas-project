@@ -25,10 +25,9 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'role_id' => ['required', 'integer'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8'],
         ];
     }
 
@@ -41,7 +40,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'email.unique' => 'Vous avez déjà un compte, veuillez vous connecter.',
-            'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
         ];
     }
 }
